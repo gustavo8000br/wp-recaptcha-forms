@@ -1,5 +1,33 @@
+# Environment & Secrets
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+
+# Ambiente de teste local (Docker, dados/volumes)
 test-env/
-node_modules/
+
+# Dependências
 vendor/
+node_modules/
+composer.lock
+
+# Build & distribuição
+dist/
+build/
 *.zip
+
+# Traduções compiladas geradas (fonte .pot/.po é versionada, .mo não)
+languages/*.mo
+
+# Logs
+*.log
+logs/
+
+# IDE & OS
 .DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
