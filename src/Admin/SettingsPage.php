@@ -7,6 +7,7 @@
 
 namespace WpRecaptchaForms\Admin;
 
+use WpRecaptchaForms\Consent\ConsentGate;
 use WpRecaptchaForms\Gate\FailurePolicy;
 use WpRecaptchaForms\Integrations\Registry;
 use WpRecaptchaForms\Options;
@@ -333,6 +334,24 @@ final class SettingsPage {
 		echo '<tr><th scope="row">' . esc_html__( 'Privacidade', 'wp-recaptcha-forms' ) . '</th><td>';
 		echo '<label><input type="checkbox" name="' . esc_attr( $name ) . '[remoteip]" value="1" ' . checked( true, (bool) $options['remoteip'], false ) . '> ' . esc_html__( 'Enviar o endereço IP do visitante ao Google junto com a verificação', 'wp-recaptcha-forms' ) . '</label>';
 		echo '<p class="description">' . esc_html__( 'Melhora a qualidade do score. Desligar não impede que o Google receba o IP: o script do reCAPTCHA é carregado do domínio do Google pelo navegador do visitante.', 'wp-recaptcha-forms' ) . '</p>';
+		echo '</td></tr>';
+
+		// Consentimento (v1.1 §2.2).
+		echo '<tr><th scope="row"><label for="wrf-consent-mode">' . esc_html__( 'Consentimento antes de carregar o script do Google', 'wp-recaptcha-forms' ) . '</label></th><td>';
+		echo '<select name="' . esc_attr( $name ) . '[consent_mode]" id="wrf-consent-mode">';
+		$consent_labels = array(
+			ConsentGate::MODE_OFF      => __( 'Não exigir — carrega sempre', 'wp-recaptcha-forms' ),
+			ConsentGate::MODE_AUTO     => __( 'Automático — respeita a WP Consent API, se houver', 'wp-recaptcha-forms' ),
+			ConsentGate::MODE_REQUIRED => __( 'Exigir — não carrega sem consentimento explícito', 'wp-recaptcha-forms' ),
+		);
+
+		foreach ( $consent_labels as $value => $label ) {
+			echo '<option value="' . esc_attr( $value ) . '" ' . selected( $value, (string) $options['consent_mode'], false ) . '>' . esc_html( $label ) . '</option>';
+		}
+
+		echo '</select>';
+		echo '<p class="description">' . esc_html( ConsentGate::status_text() ) . '</p>';
+		echo '<p class="description">' . esc_html__( 'O plugin não se integra a nenhuma plataforma de consentimento pelo nome: ele publica um contrato (um filtro no PHP e uma função no JavaScript) que qualquer uma pode chamar. O README traz os trechos prontos.', 'wp-recaptcha-forms' ) . '</p>';
 		echo '</td></tr>';
 
 		echo '</tbody></table>';

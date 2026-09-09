@@ -7,6 +7,7 @@
 
 namespace WpRecaptchaForms\Frontend;
 
+use WpRecaptchaForms\Consent\ConsentGate;
 use WpRecaptchaForms\Options;
 use WpRecaptchaForms\Provider\ProviderFactory;
 
@@ -44,6 +45,17 @@ final class AssetManager {
 	private $requested = false;
 
 	/**
+	 * Os handles já foram registrados neste request?
+	 *
+	 * O registro acontece por dois caminhos (o enqueue normal e o registrador do checkout
+	 * em Blocks). Sem esta trava, `wp_localize_script` roda duas vezes e o `var wrf` sai
+	 * duplicado no HTML.
+	 *
+	 * @var bool
+	 */
+	private $registered = false;
+
+	/**
 	 * Acessa a instância.
 	 *
 	 * @return AssetManager
@@ -76,9 +88,11 @@ final class AssetManager {
 	 * @return void
 	 */
 	public function register(): void {
-		if ( '' === Options::site_key() ) {
+		if ( '' === Options::site_key() || $this->registered ) {
 			return;
 		}
+
+		$this->registered = true;
 
 		$provider = ProviderFactory::create();
 		$locale   = function_exists( 'determine_locale' ) ? determine_locale() : '';
@@ -96,7 +110,7 @@ final class AssetManager {
 		wp_register_script(
 			self::HANDLE,
 			WP_RECAPTCHA_FORMS_URL . 'assets/js/dist/' . $file,
-			array( self::HANDLE_PROVIDER ),
+			self::provider_dependency(),
 			WP_RECAPTCHA_FORMS_VERSION,
 			true
 		);
@@ -105,10 +119,18 @@ final class AssetManager {
 			self::HANDLE,
 			'wrf',
 			array(
-				'siteKey'     => Options::site_key(),
-				'version'     => Options::version(),
-				'loadTimeout' => (int) apply_filters( 'wp_recaptcha_forms_load_timeout', 4000 ),
-				'i18n'        => array(
+				'siteKey'        => Options::site_key(),
+				'version'        => Options::version(),
+				'loadTimeout'    => (int) apply_filters( 'wp_recaptcha_forms_load_timeout', 4000 ),
+				// Sob gating, o script do provedor não é enfileirado: o JS o injeta sob
+				// demanda quando o CMP conceder (v1.1 §2.5). A URL vem daqui porque só o
+				// Provider sabe montá-la.
+				'providerUrl'    => $provider->script_url( Options::site_key(), (string) $locale ),
+				// '1'/'0' e não booleano: `wp_localize_script` converte todo valor em
+				// string, e `false` viraria "" — que em JavaScript não é `false`. O gating
+				// de consentimento deixaria de existir no cliente, em silêncio.
+				'consentGranted' => ConsentGate::granted() ? '1' : '0',
+				'i18n'           => array(
 					'unreachableNotice' => Messages::unreachable_notice(),
 				),
 			)
@@ -145,9 +167,29 @@ final class AssetManager {
 		}
 
 		if ( wp_script_is( self::HANDLE, 'registered' ) ) {
-			wp_enqueue_script( self::HANDLE_PROVIDER );
+			foreach ( self::provider_dependency() as $handle ) {
+				wp_enqueue_script( $handle );
+			}
+
 			wp_enqueue_script( self::HANDLE );
 		}
+	}
+
+	/**
+	 * O handle do provedor, quando ele pode ser carregado no page load.
+	 *
+	 * Sob `consent_mode` em `auto`/`required` sem consentimento, devolve array vazio: o
+	 * `frontend.js` (leve, sem terceiro, sem dado pessoal) continua carregando, e o
+	 * `api.js` só entra no DOM depois de `grantConsent()`.
+	 *
+	 * FR-07 permanece intocado e continua sendo a mitigação de privacidade mais efetiva do
+	 * plugin: ele decide EM QUAIS PÁGINAS o script carrega; o consentimento decide SOB QUAL
+	 * CONDIÇÃO. Os dois são ortogonais.
+	 *
+	 * @return string[]
+	 */
+	public static function provider_dependency(): array {
+		return ConsentGate::granted() ? array( self::HANDLE_PROVIDER ) : array();
 	}
 
 	/**
