@@ -4,8 +4,8 @@ Passos que **não** são automatizáveis de forma barata em CI e por isso são r
 aqui. Cada um tem um critério binário; "testei e pareceu ok" não é resultado.
 
 > Esta lista cresce a cada rodada de stories. Nesta versão ela cobre a fundação
-> (Stories 1.1 a 1.6). Os itens de WooCommerce, login, consentimento e i18n entram com as
-> stories correspondentes.
+> (Stories 1.1 a 1.6) e a cobertura de formulários (Stories 1.7 a 1.17). Os itens de i18n,
+> compatibilidade e hardening entram com as stories correspondentes.
 
 ---
 
@@ -64,6 +64,50 @@ O passo 5 é o mais valioso: verifica o **invariante** (A3), não o sintoma.
    a mensagem de "não foi possível confirmar que você não é um robô".
 
 ---
+
+## Checkout do WooCommerce, os dois caminhos (S-04)
+
+Os dois exercícios têm que produzir o MESMO desfecho para a mesma entrada. Divergência
+entre clássico e Blocks é o risco central desta área: ninguém consegue reproduzir um
+checkout que bloqueia num caminho e passa no outro.
+
+1. **Clássico** (página com `[woocommerce_checkout]`), como **convidado** e como **logado**:
+   finalizar uma compra. Deve passar, e o campo `wrf_token` tem que estar dentro do
+   `<form>` do checkout.
+2. **Blocks** (bloco `woocommerce/checkout`), convidado e logado: finalizar uma compra.
+3. Com **uBlock Origin** ativo e política em "permitir": os dois caminhos completam o
+   pedido. Em "bloquear": os dois recusam, com a mensagem de bloqueador — **não** com a
+   de "não foi possível confirmar que você não é um robô".
+4. No console do navegador, na página do checkout em Blocks, não pode haver erro de JS:
+   o observador `onCheckoutValidation` roda antes de cada tentativa de pagamento.
+
+## XML-RPC e clientes programáticos (BL-04)
+
+Com a proteção de login **ligada**:
+
+1. `wp.getUsersBlogs` por XML-RPC com credenciais válidas → **sucesso**.
+2. `wp login` pelo WP-CLI (ou `wp user list` numa instalação remota) → **sucesso**.
+3. Uma chamada REST autenticada por application password → **sucesso**.
+
+Se qualquer um destes falhar, `applies()` está frouxo e o plugin está trancando
+integrações legítimas — o modo de falha mais caro desta versão, porque só aparece dias
+depois, no Jetpack ou no aplicativo do celular.
+
+## Consentimento (CMP)
+
+1. Com `consent_mode = required` e nenhuma plataforma de consentimento: o `api.js`
+   **não** está no DOM (confira por `src` de script, não pelo objeto `wrf`, que sempre
+   carrega a URL para o carregamento sob demanda).
+2. Chamar `window.wpRecaptchaForms.grantConsent()` no console: a tag do `api.js` aparece,
+   e o submit seguinte leva token.
+3. Com `consent_mode = off`: o `api.js` volta a ser enfileirado no page load.
+
+## Privacidade (FR-31/FR-32)
+
+1. O shortcode `[wp_recaptcha_forms_privacy_notice]` renderiza numa página.
+2. O texto aparece em **Configurações → Privacidade**, na política sugerida.
+3. Alternar o envio de IP muda o bloco correspondente do texto.
+4. As duas URLs do Google (política de privacidade e termos) respondem **200**.
 
 ## Instalação a partir do zip (BL-07 item 2)
 
