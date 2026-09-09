@@ -30,6 +30,20 @@
         "lint": "phpcs",
         "lint:fix": "phpcbf",
         "test": "phpunit",
-        "check:boundary": "bash bin/check-boundary.sh"
+        "check:boundary": "bash bin/check-boundary.sh",
+        "i18n:pot": "php bin/i18n-pot.php",
+        "i18n:pseudo": "php bin/i18n-pseudo.php",
+        "i18n:build": "php bin/i18n-build.php",
+        "i18n:progress": "php bin/i18n-progress.php",
+        "i18n:e2e": "bash bin/i18n-e2e.sh"
+    },
+    "scripts-descriptions": {
+        "lint": "PHPCS com o ruleset WPCS do projeto.",
+        "test": "Suite unitaria (PHPUnit), sem rede e sem WordPress carregado.",
+        "check:boundary": "Gates de fronteira: vocabulario do Google e $_POST confinados.",
+        "i18n:pot": "Regenera languages/wp-recaptcha-forms.pot a partir do codigo.",
+        "i18n:build": "Compila os .po em .mo (sem depender do msgfmt).",
+        "i18n:progress": "Recalcula a tabela de progresso de traducao nos READMEs.",
+        "i18n:e2e": "Gate de pseudo-locale: prova que nenhuma string visivel escapou do i18n."
     }
 }

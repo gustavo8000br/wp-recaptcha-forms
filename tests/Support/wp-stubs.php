@@ -48,6 +48,13 @@ final class WpStubs {
 	public static $capabilities = null;
 
 	/**
+	 * Catálogo de tradução ativo. `null` = stub identidade.
+	 *
+	 * @var array<string,string>|null
+	 */
+	public static $catalog = null;
+
+	/**
 	 * Chamadas registradas da Settings API.
 	 *
 	 * @var array[]
@@ -72,6 +79,7 @@ final class WpStubs {
 		self::$privacy_content = array();
 		self::$scripts         = array();
 		self::$capabilities    = null;
+		self::$catalog         = null;
 		self::$settings_calls  = array();
 		self::$settings_errors = array();
 
@@ -186,12 +194,44 @@ function delete_transient( $name ) {
 	return true;
 }
 
+/**
+ * Tradução.
+ *
+ * Com `WpStubs::$catalog` nulo (default) o stub é identidade, como sempre foi. Com um
+ * catálogo carregado, ele traduz de verdade — é isso que permite ao gate de
+ * pseudo-locale da Story 1.20 provar que a string passou pelo pipeline de i18n em vez de
+ * ter sido impressa direto.
+ *
+ * @param string $text   Texto.
+ * @param string $domain Text domain.
+ * @return string
+ */
 function __( $text, $domain = 'default' ) {
-	return $text;
+	if ( null === WpStubs::$catalog ) {
+		return $text;
+	}
+
+	return WpStubs::$catalog[ (string) $text ] ?? $text;
 }
 
 function esc_html__( $text, $domain = 'default' ) {
-	return $text;
+	return __( $text, $domain );
+}
+
+function esc_attr__( $text, $domain = 'default' ) {
+	return __( $text, $domain );
+}
+
+function _x( $text, $context, $domain = 'default' ) {
+	if ( null === WpStubs::$catalog ) {
+		return $text;
+	}
+
+	return WpStubs::$catalog[ $context . "\4" . $text ] ?? WpStubs::$catalog[ (string) $text ] ?? $text;
+}
+
+function _e( $text, $domain = 'default' ) {
+	echo esc_html( __( $text, $domain ) );
 }
 
 function esc_html( $text ) {
@@ -468,4 +508,32 @@ function __checked_selected_helper( $helper, $current, $display, $type ) {
 	}
 
 	return $result;
+}
+
+/**
+ * URLs do admin. Nos testes só precisam ser determinísticas.
+ *
+ * @param string $path Caminho relativo.
+ * @return string
+ */
+function admin_url( $path = '' ) {
+	return 'https://example.test/wp-admin/' . ltrim( (string) $path, '/' );
+}
+
+function self_admin_url( $path = '' ) {
+	return admin_url( $path );
+}
+
+function get_admin_url( $blog_id = null, $path = '' ) {
+	return admin_url( $path );
+}
+
+/**
+ * `wp_json_encode` sem as opções do core (a suíte não precisa delas).
+ *
+ * @param mixed $data Dados.
+ * @return string
+ */
+function wp_json_encode( $data, $options = 0, $depth = 512 ) {
+	return (string) json_encode( $data, (int) $options, (int) $depth );
 }

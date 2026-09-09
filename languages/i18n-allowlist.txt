@@ -1,0 +1,60 @@
+# Allowlist fechada do gate de pseudo-locale (Story 1.20 AC 3).
+#
+# Termos que aparecem em texto visível e NUNCA são traduzidos. Alterar esta lista exige
+# justificativa explícita no PR — cada linha acrescentada é um pedaço da tela que o gate
+# deixa de vigiar.
+#
+# Um termo entra aqui apenas se for:
+#   (a) nome próprio de produto ou marca, ou
+#   (b) identificador literal que o operador digita ou copia (constante, chave, slug), ou
+#   (c) chrome do próprio admin do WordPress, que o WP traduz com o domain dele.
+#
+# Comparação: case-insensitive, palavra inteira.
+
+# (a) Nomes próprios.
+WordPress
+WooCommerce
+reCAPTCHA
+Google
+Newsletter
+WP reCAPTCHA Forms
+Cloudflare
+Complianz
+CookieYes
+LiteSpeed
+Autoptimize
+WP Rocket
+Poedit
+GitHub
+
+# (b) Identificadores literais que o operador vê e copia.
+wp-config.php
+functions.php
+wp-login.php
+WRF_DISABLE
+WP_RECAPTCHA_FORMS_DISABLE
+WP_RECAPTCHA_FORMS_SECRET_KEY
+WP_DEBUG
+wp_recaptcha_forms_privacy_notice
+wp_recaptcha_forms
+site key
+secret key
+siteverify
+api.js
+v2
+v3
+LGPD
+GDPR
+CMP
+IP
+URL
+HTML
+JavaScript
+AJAX
+REST
+XML-RPC
+WP-CLI
+
+# (c) Chrome do admin do WordPress (traduzido pelo core, domain `default`).
+Salvar
+Salvar alterações

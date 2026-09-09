@@ -24,8 +24,12 @@ composer.lock
 /build/
 *.zip
 
-# Traduções compiladas geradas (fonte .pot/.po é versionada, .mo não)
-languages/*.mo
+# Artefatos do pseudo-locale: gerados pelo gate de i18n a cada execução, nunca versionados.
+# Os .mo dos idiomas MANTIDOS (pt_BR, en_US, es_ES) SÃO versionados de propósito — a regra
+# assimétrica da Story 1.21 AC 9: idioma mantido entra com .po e .mo, e o CI valida que os
+# dois batem; idioma de comunidade entra só com .po.
+languages/*-en_CA.po
+languages/*-en_CA.mo
 
 # Logs
 *.log
