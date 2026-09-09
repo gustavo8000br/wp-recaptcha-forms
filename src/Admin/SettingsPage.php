@@ -60,6 +60,66 @@ final class SettingsPage {
 		add_action( 'admin_menu', array( $this, 'register_menu' ) );
 		add_action( 'admin_init', array( $this, 'register_settings' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_styles' ) );
+		add_filter( 'admin_footer_text', array( $this, 'filter_footer_text' ) );
+		add_filter( 'update_footer', array( $this, 'filter_version_footer' ), 11 );
+		add_filter(
+			'plugin_action_links_' . plugin_basename( WP_RECAPTCHA_FORMS_FILE ),
+			array( $this, 'add_settings_link' )
+		);
+	}
+
+	/**
+	 * Remove o rodapé padrão do WordPress ("Obrigado por criar com o WordPress...")
+	 * só na tela deste plugin — não mexe no rodapé do resto do admin.
+	 *
+	 * @param string $text Texto original do rodapé.
+	 * @return string
+	 */
+	public function filter_footer_text( $text ) {
+		$screen = get_current_screen();
+
+		if ( $screen && 'settings_page_' . self::SLUG === $screen->id ) {
+			return '';
+		}
+
+		return $text;
+	}
+
+	/**
+	 * Remove o "Version X.Y" (canto direito do rodapé) só na tela deste plugin —
+	 * mesmo par de hooks que o filtro do texto (admin_footer_text/update_footer),
+	 * o WordPress só permite personalizar os dois juntos.
+	 *
+	 * @param string $text Texto original ("Version 7.1").
+	 * @return string
+	 */
+	public function filter_version_footer( $text ) {
+		$screen = get_current_screen();
+
+		if ( $screen && 'settings_page_' . self::SLUG === $screen->id ) {
+			return '';
+		}
+
+		return $text;
+	}
+
+	/**
+	 * Adiciona o link "Configurações" na linha do plugin em Plugins > Instalados,
+	 * ao lado de "Ativar"/"Desativar" — leva quem instala direto pra tela de config.
+	 *
+	 * @param array $links Links existentes.
+	 * @return array
+	 */
+	public function add_settings_link( $links ) {
+		$settings_link = sprintf(
+			'<a href="%s">%s</a>',
+			esc_url( admin_url( 'options-general.php?page=' . self::SLUG ) ),
+			esc_html__( 'Configurações', 'wp-recaptcha-forms' )
+		);
+
+		array_unshift( $links, $settings_link );
+
+		return $links;
 	}
 
 	/**
