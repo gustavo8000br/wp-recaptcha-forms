@@ -60,6 +60,9 @@ final class Plugin {
 		// Prioridade 20: depois do WooCommerce, para que o registry veja o que existe.
 		add_action( 'plugins_loaded', array( $this, 'boot_integrations' ), 20 );
 
+		Consent\WpConsentApiBridge::boot();
+		Privacy\PrivacyShortcode::boot();
+
 		Admin\SiteHealth::boot();
 
 		if ( is_admin() ) {
@@ -71,14 +74,32 @@ final class Plugin {
 	/**
 	 * Registra as integrações disponíveis.
 	 *
-	 * O registry nasce vazio nesta rodada: as integrações concretas são das stories
-	 * seguintes. O ponto de registro existe desde já porque a tela de configurações é
-	 * gerada a partir dele.
+	 * Prioridade 20 em `plugins_loaded`: depois do WooCommerce, para que a detecção veja
+	 * o que existe de verdade. Integrações nativas entram sempre; Newsletter e WooCommerce
+	 * só sob detecção real — e o que não entra no registry não aparece na tela de
+	 * configurações, sem uma linha de UI condicional (FR-13).
 	 *
 	 * @return void
 	 */
 	public function boot_integrations(): void {
 		$registry = Integrations\Registry::instance();
+
+		$registry->register( new Integrations\Core\CommentIntegration() );
+		$registry->register( new Integrations\Core\LoginIntegration() );
+		$registry->register( new Integrations\Core\RegisterIntegration() );
+		$registry->register( new Integrations\Core\LostPasswordIntegration() );
+
+		$newsletter = new Integrations\Newsletter\SubscribeIntegration();
+
+		if ( $newsletter->available() ) {
+			$registry->register( $newsletter );
+		}
+
+		if ( Integrations\WooCommerce\Support::is_active() ) {
+			$registry->register( new Integrations\WooCommerce\CheckoutIntegration() );
+			$registry->register( new Integrations\WooCommerce\ReviewIntegration() );
+			$registry->register( new Integrations\WooCommerce\LostPasswordIntegration() );
+		}
 
 		/**
 		 * Permite registrar integrações antes do boot.

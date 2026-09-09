@@ -77,6 +77,29 @@ else
 	pass '$_POST confinado ao coletor único e ao admin'
 fi
 
+# ---------------------------------------------------------------------------
+# 5. Classes que `implements` algo do WooCommerce ficam FORA do autoload.
+# ---------------------------------------------------------------------------
+# `implements` é resolvido pelo PHP no LOAD da classe, antes de qualquer guard dentro
+# dela poder rodar: autoload de uma dessas classes é fatal error em toda instalação sem
+# WooCommerce. A convenção que torna isso verificável é o diretório `conditional/`, que
+# nenhum PSR-4 do projeto mapeia.
+HITS="$(grep -rln --include='*.php' '@wrf-conditional-load' src/ | grep -v '/conditional/' || true)"
+
+if [ -n "$HITS" ]; then
+	fail 'arquivo anotado @wrf-conditional-load fora de um diretório conditional/ (seria autocarregado)' "$HITS"
+else
+	pass 'classes de carga condicional isoladas em conditional/'
+fi
+
+HITS="$(grep -rln --include='*.php' -E 'implements[^{]*\bIntegrationInterface\b' src/Integrations/WooCommerce/ 2>/dev/null | grep -v '/conditional/' || true)"
+
+if [ -n "$HITS" ]; then
+	fail 'classe WooCommerce implementa interface do Woo fora de conditional/' "$HITS"
+else
+	pass 'nenhum implements de interface do Woo em caminho autocarregável'
+fi
+
 if [ "$FAILED" -ne 0 ]; then
 	printf '\nGate de fronteira reprovado.\n' >&2
 	exit 1
