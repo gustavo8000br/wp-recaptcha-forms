@@ -14,8 +14,14 @@ node_modules/
 composer.lock
 
 # Build & distribuição
-dist/
-build/
+#
+# `/dist/` e `/build/` com barra inicial, ancorados na raiz: o padrão solto `dist/`
+# casava também `assets/js/dist/`, que é EXATAMENTE o que precisa estar versionado —
+# o `.distignore` exclui `assets/js/src/` do zip e inclui o `dist/`. Sem isto, o zip
+# publicado sai sem JavaScript nenhum: o campo é impresso, o script dá 404, o token
+# nunca é obtido e o plugin deixa de verificar em silêncio.
+/dist/
+/build/
 *.zip
 
 # Traduções compiladas geradas (fonte .pot/.po é versionada, .mo não)
@@ -31,3 +37,6 @@ Thumbs.db
 .idea/
 .vscode/
 *.swp
+
+# Cache do PHPUnit
+.phpunit.result.cache
