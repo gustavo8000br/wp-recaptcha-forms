@@ -70,6 +70,13 @@ final class ProviderResponse {
 	private $debug_codes;
 
 	/**
+	 * Motivo da recusa no nosso vocabulário (RejectionReason::*).
+	 *
+	 * @var string|null
+	 */
+	private $reason;
+
+	/**
 	 * Construtor.
 	 *
 	 * @param bool        $reached     O provedor respondeu?
@@ -79,6 +86,7 @@ final class ProviderResponse {
 	 * @param string|null $action      Action.
 	 * @param string|null $hostname    Hostname.
 	 * @param string[]    $debug_codes Códigos crus.
+	 * @param string|null $reason      Motivo da recusa (RejectionReason::*).
 	 */
 	public function __construct(
 		bool $reached,
@@ -87,8 +95,10 @@ final class ProviderResponse {
 		?float $score = null,
 		?string $action = null,
 		?string $hostname = null,
-		array $debug_codes = array()
+		array $debug_codes = array(),
+		?string $reason = null
 	) {
+		$this->reason = $reason;
 		$this->reached     = $reached;
 		$this->success     = $success;
 		$this->failure     = $failure;
@@ -159,5 +169,14 @@ final class ProviderResponse {
 	 */
 	public function debug_codes(): array {
 		return $this->debug_codes;
+	}
+
+	/**
+	 * Motivo da recusa, no vocabulário do plugin.
+	 *
+	 * @return string|null
+	 */
+	public function reason(): ?string {
+		return $this->reason;
 	}
 }

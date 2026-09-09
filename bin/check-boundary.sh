@@ -53,6 +53,30 @@ else
 	pass 'vocabulário do provedor confinado a src/Provider/'
 fi
 
+# ---------------------------------------------------------------------------
+# 3. O vocabulário do cstate é nosso, e é lido em um único lugar (v1.1 §8.2).
+# ---------------------------------------------------------------------------
+HITS="$(grep -rn --include='*.php' -e 'wrf_cstate' src/ | grep -v -e '^src/Gate/ClientState.php:' -e '^src/Frontend/FieldRenderer.php:' || true)"
+
+if [ -n "$HITS" ]; then
+	fail 'wrf_cstate aparece fora de Gate/ClientState.php e Frontend/FieldRenderer.php' "$HITS"
+else
+	pass 'wrf_cstate confinado ao coletor e ao renderizador'
+fi
+
+# ---------------------------------------------------------------------------
+# 4. Nenhum adaptador toca em $_POST: o coletor é único (BL-06).
+# ---------------------------------------------------------------------------
+# Casa o ACESSO (`$_POST[`), não a menção: a regra precisa poder ser citada em
+# comentário no próprio arquivo que a explica.
+HITS="$(grep -rnE --include='*.php' '\$_(POST|REQUEST)\[' src/ | grep -v -e '^src/Gate/ClientState.php:' -e '^src/Gate/TokenCollector.php:' -e '^src/Admin/' || true)"
+
+if [ -n "$HITS" ]; then
+	fail '$_POST é lido fora do coletor único (adaptadores devem receber FormContext pronto)' "$HITS"
+else
+	pass '$_POST confinado ao coletor único e ao admin'
+fi
+
 if [ "$FAILED" -ne 0 ]; then
 	printf '\nGate de fronteira reprovado.\n' >&2
 	exit 1
