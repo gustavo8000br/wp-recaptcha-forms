@@ -18,6 +18,10 @@ Regra de bump (resumida — a íntegra está na Story 1.18):
 
 ### Adicionado
 
+- Medição de cobertura de código: script `composer test:coverage` (Clover + HTML + resumo
+  em texto) e job dedicado no CI em PHP 8.3 com PCOV, publicando o relatório como
+  artefato. Publica sem gate — o limiar bloqueante segue como decisão em aberto do dono
+  do produto, registrada em `docs/architecture-coverage.md` §6 (issue #27).
 - Licença GPLv2-or-later em `LICENSE`, coerente com o header do plugin e com o
   `composer.json` (Story 1.19).
 - Workflow de CI (`.github/workflows/ci.yml`) rodando testes, gate de fronteira, gate de

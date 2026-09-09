@@ -30,6 +30,10 @@
         "lint": "phpcs",
         "lint:fix": "phpcbf",
         "test": "phpunit",
+        "test:coverage": [
+            "@putenv XDEBUG_MODE=coverage",
+            "phpunit --coverage-clover=build/coverage/clover.xml --coverage-html=build/coverage/html --coverage-text"
+        ],
         "check:boundary": "bash bin/check-boundary.sh",
         "i18n:pot": "php bin/i18n-pot.php",
         "i18n:pseudo": "php bin/i18n-pseudo.php",
@@ -40,6 +44,7 @@
     "scripts-descriptions": {
         "lint": "PHPCS com o ruleset WPCS do projeto.",
         "test": "Suite unitaria (PHPUnit), sem rede e sem WordPress carregado.",
+        "test:coverage": "Mesma suite com medicao de cobertura: Clover em build/coverage/clover.xml, HTML em build/coverage/html e resumo no terminal. Exige um driver (PCOV recomendado, Xdebug aceito).",
         "check:boundary": "Gates de fronteira: vocabulario do Google e $_POST confinados.",
         "i18n:pot": "Regenera languages/wp-recaptcha-forms.pot a partir do codigo.",
         "i18n:build": "Compila os .po em .mo (sem depender do msgfmt).",

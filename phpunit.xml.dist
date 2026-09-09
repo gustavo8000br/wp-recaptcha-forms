@@ -10,9 +10,27 @@
             <directory suffix="Test.php">tests/Unit</directory>
         </testsuite>
     </testsuites>
-    <coverage>
+    <!--
+        `processUncoveredFiles="true"`: um arquivo de src/ que nenhum teste sequer carrega
+        entra no relatorio como 0%, em vez de sumir da conta. Sem isso, a metrica premia o
+        arquivo nunca testado — que e exatamente o arquivo sobre o qual a medicao existe
+        para avisar. `cacheDirectory` fica sob build/, que ja e ignorado no git e no zip.
+    -->
+    <coverage processUncoveredFiles="true" cacheDirectory="build/coverage/cache">
         <include>
             <directory suffix=".php">src</directory>
         </include>
+        <!--
+            `src/Integrations/WooCommerce/conditional/` esta fora por razao de
+            arquitetura, nao para maquiar a metrica: o arquivo daquele diretorio
+            `implements` uma interface do WooCommerce Blocks, e o PHP resolve
+            `implements` no LOAD da classe. `processUncoveredFiles` carrega todo arquivo
+            incluido — e carregar esse produz fatal ("Interface ... not found") sem o
+            WooCommerce presente. Ele e coberto pelos testes de integracao via WP-CLI,
+            que rodam com o Woo carregado, nao pela suite unitaria.
+        -->
+        <exclude>
+            <directory suffix=".php">src/Integrations/WooCommerce/conditional</directory>
+        </exclude>
     </coverage>
 </phpunit>

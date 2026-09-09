@@ -69,6 +69,91 @@ jobs:
         run: composer i18n:e2e
 
   # ---------------------------------------------------------------------------
+  # Cobertura de código — issue #27.
+  #
+  # Job separado, e não um passo dentro da matriz, por duas razões:
+  #
+  # 1. Medir nos três PHPs produziria três números que só divergem por diferenças do
+  #    driver e do próprio motor, não por qualidade de teste. Três números para a mesma
+  #    pergunta é pior que um: o leitor tem de escolher em qual acreditar.
+  # 2. A matriz roda com `coverage: none` de propósito. Ligar cobertura lá dentro
+  #    condicionalmente (`if: matrix.php == '8.3'`) faria um job da matriz medir e os
+  #    outros dois não — o mesmo job, com duas naturezas, é como gate vira folclore.
+  #
+  # PHP 8.3 e não 7.4: o número tem de descrever o alvo do projeto, não o piso.
+  #
+  # SEM GATE BLOQUEANTE. Isto publica e não reprova. Cravar um limiar é decisão do dono
+  # do produto e está registrada como pendente em docs/architecture-coverage.md §6 —
+  # um limiar escolhido por quem escreve o YAML é ou teatro ou incentivo a teste-para-a-
+  # métrica. `continue-on-error` NÃO é usado: falha de execução do PHPUnit tem de
+  # aparecer vermelha. O que não bloqueia é o percentual, não a execução.
+  # ---------------------------------------------------------------------------
+  coverage:
+    name: Cobertura de código (PHP 8.3, PCOV)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # `coverage: pcov` e não `xdebug`: ver docs/architecture-coverage.md §2. Em resumo,
+      # PCOV só faz cobertura de linha e não tem outro modo para ligar por engano.
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          coverage: pcov
+          tools: composer
+
+      - name: Cache do Composer
+        uses: actions/cache@v4
+        with:
+          path: ~/.composer/cache
+          key: composer-8.3-${{ hashFiles('composer.json') }}
+          restore-keys: composer-8.3-
+
+      - name: Instalar dependências
+        run: composer install --no-progress --prefer-dist
+
+      # Sem driver, o PHPUnit apenas AVISA e sai com 0 — o job ficaria verde publicando
+      # um artefato vazio, que é o modo de falha mais caro possível numa medição: todo
+      # mundo confia num número que não existe.
+      - name: Driver de cobertura presente
+        run: |
+          php -r 'exit(extension_loaded("pcov") || extension_loaded("xdebug") ? 0 : 1);'
+
+      - name: Medir
+        run: composer test:coverage
+
+      # Mesmo princípio do passo acima, agora sobre o resultado.
+      - name: Relatórios foram gerados
+        run: |
+          set -euo pipefail
+          test -s build/coverage/clover.xml || { echo "::error::clover.xml ausente ou vazio."; exit 1; }
+          test -s build/coverage/html/index.html || { echo "::error::relatório HTML ausente."; exit 1; }
+
+      # O resumo no topo da execução evita que ler o número custe baixar um zip.
+      - name: Resumo na execução
+        run: |
+          set -euo pipefail
+          php -r '
+            $x = simplexml_load_file("build/coverage/clover.xml");
+            $m = $x->project->metrics;
+            $pct = fn($c, $t) => $t > 0 ? sprintf("%.2f%% (%d/%d)", $c / $t * 100, $c, $t) : "n/a";
+            printf("| Métrica | Cobertura |%s|---|---|%s", PHP_EOL, PHP_EOL);
+            printf("| Linhas | %s |%s",  $pct((int) $m["coveredstatements"], (int) $m["statements"]), PHP_EOL);
+            printf("| Métodos | %s |%s", $pct((int) $m["coveredmethods"],    (int) $m["methods"]),    PHP_EOL);
+          ' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Publicar relatório
+        uses: actions/upload-artifact@v4
+        with:
+          name: cobertura-php83
+          path: |
+            build/coverage/clover.xml
+            build/coverage/html
+          retention-days: 14
+          if-no-files-found: error
+
+  # ---------------------------------------------------------------------------
   # Lint numa versão só: o WPCS não depende da versão de PHP do runner para decidir o
   # que é violação — o piso alvo vem de `testVersion` no phpcs.xml.dist.
   # ---------------------------------------------------------------------------
