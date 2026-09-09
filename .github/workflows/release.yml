@@ -1,0 +1,122 @@
+name: Release
+
+# Dispara com uma tag vMAJOR.MINOR.PATCH (ex.: v1.2.0, v1.2.0-beta.1) ou manualmente,
+# informando a mesma tag já existente no repositório.
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag já existente (ex.: v1.2.0) para reconstruir a release"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  # Gate de qualidade — a mesma suíte que roda em CI de PR, repetida aqui para que uma
+  # tag empurrada sem passar por PR (hotfix) nunca vire release sem os testes passarem.
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "7.4"
+          coverage: none
+          tools: composer
+
+      - name: Instalar dependências (dev incluso — precisa do PHPUnit/PHPCS)
+        run: composer install --no-progress --prefer-dist
+
+      - name: Suíte de testes
+        run: composer test
+
+      - name: Gate de fronteira (Provider/Transport isolados)
+        run: composer check:boundary
+
+      - name: Padrão de código (WPCS)
+        run: composer lint
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref_name }}
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "7.4"
+          coverage: none
+
+      - name: Resolver a tag e a versão MAJOR.MINOR.PATCH
+        id: version
+        run: |
+          set -euo pipefail
+          TAG="${{ inputs.tag || github.ref_name }}"
+          if [[ ! "$TAG" =~ ^v([0-9]+\.[0-9]+\.[0-9]+) ]]; then
+            echo "::error::Tag '$TAG' não começa com vMAJOR.MINOR.PATCH." >&2
+            exit 1
+          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "core=${BASH_REMATCH[1]}" >> "$GITHUB_OUTPUT"
+
+      # Header do plugin recebe só MAJOR.MINOR.PATCH (WordPress precisa de SemVer limpo
+      # pra comparar versões); a tag completa fica em WP_RECAPTCHA_FORMS_BUILD.
+      # Ver bin/stamp-version.php e arquitetura v1 §11.
+      - name: Estampar versão no plugin
+        run: php bin/stamp-version.php "${{ steps.version.outputs.tag }}"
+
+      - name: Compilar traduções (.po -> .mo)
+        run: |
+          set -euo pipefail
+          if compgen -G "languages/*.po" > /dev/null; then
+            sudo apt-get update -qq && sudo apt-get install -y -qq gettext
+            for po in languages/*.po; do
+              msgfmt "$po" -o "${po%.po}.mo"
+            done
+          else
+            echo "Nenhum .po encontrado ainda — pulando compilação de traduções."
+          fi
+
+      - name: Montar artefato de distribuição
+        id: artifact
+        run: |
+          set -euo pipefail
+          STAGE_DIR="build/wp-recaptcha-forms"
+          mkdir -p "$STAGE_DIR"
+          rsync -a --exclude-from='.distignore' ./ "$STAGE_DIR/"
+
+          ZIP_NAME="wp-recaptcha-forms_v${{ steps.version.outputs.core }}.zip"
+          ( cd build && zip -r "../$ZIP_NAME" wp-recaptcha-forms -x '*.DS_Store' )
+
+          echo "zip_name=$ZIP_NAME" >> "$GITHUB_OUTPUT"
+
+      - name: Checagem mínima do zip (tem o arquivo principal, header consistente)
+        run: |
+          set -euo pipefail
+          ZIP="${{ steps.artifact.outputs.zip_name }}"
+          unzip -l "$ZIP" | grep -q "wp-recaptcha-forms/wp-recaptcha-forms.php" \
+            || { echo "::error::Arquivo principal do plugin ausente no zip."; exit 1; }
+          unzip -p "$ZIP" wp-recaptcha-forms/wp-recaptcha-forms.php \
+            | grep -q "Version:.*${{ steps.version.outputs.core }}" \
+            || { echo "::error::Header do plugin não bate com a versão da tag."; exit 1; }
+
+      - name: Publicar release no GitHub
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: "v${{ steps.version.outputs.core }}"
+          generate_release_notes: true
+          files: ${{ steps.artifact.outputs.zip_name }}
+
+      - name: Lembrete de verificação manual
+        run: |
+          echo "::notice::Release publicada. Antes de anunciar, rode manualmente a seção \
+          'Instalação a partir do zip' de docs/release-checklist.md — instalar este zip \
+          exato num WordPress limpo pelo painel e confirmar ativação sem notice/warning."

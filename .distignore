@@ -1,0 +1,30 @@
+# Arquivos que NÃO entram no zip de distribuição (instalável no WordPress).
+# Consumido pelo workflow de release (.github/workflows/release.yml) via rsync --exclude-from.
+# Tudo que não está listado aqui é considerado runtime do plugin e vai pro zip —
+# incluindo README.md, README-EN.md, LICENSE e languages/*.po (fonte de tradução).
+
+.git/
+.github/
+.gitignore
+.distignore
+.editorconfig
+.phpunit.result.cache
+
+test-env/
+tests/
+docs/
+bin/
+build/
+
+composer.json
+composer.lock
+phpunit.xml.dist
+phpunit.xml
+
+# Código-fonte JS não minificado — só o build em assets/js/dist/ vai pro zip.
+assets/js/src/
+
+# Documentação de contribuição de tradução é conteúdo de repositório, não de runtime.
+languages/README.md
+
+*.zip
