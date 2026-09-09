@@ -57,24 +57,24 @@ final class Options {
 	 */
 	public static function defaults(): array {
 		return array(
-			'version'                          => 'v3',
-			'site_key'                         => '',
-			'secret_key'                       => '',
-			'threshold'                        => 0.6,
-			'remoteip'                         => true,
-			'consent_mode'                     => 'off',
+			'version'                           => 'v3',
+			'site_key'                          => '',
+			'secret_key'                        => '',
+			'threshold'                         => 0.6,
+			'remoteip'                          => true,
+			'consent_mode'                      => 'off',
 			// Eixos de política de falha, independentes desde o primeiro dia (v1.1 §7.3).
-			'failure_policy_infra'             => 'allow',
+			'failure_policy_infra'              => 'allow',
 			'failure_policy_client_unreachable' => 'allow',
 			// Mensagens customizáveis do operador (FR-27). Vazio = usa o default traduzido.
-			'messages'                         => array(
+			'messages'                          => array(
 				'rejected'           => '',
 				'infra'              => '',
 				'client_unreachable' => '',
 				'unreachable_notice' => '',
 			),
 			// Estado por formulário. Populado pelo Registry (Story 1.11).
-			'forms'                            => array(),
+			'forms'                             => array(),
 		);
 	}
 
@@ -274,7 +274,7 @@ final class Options {
 	public static function maybe_upgrade(): void {
 		$from = self::schema_version();
 
-		if ( $from === self::SCHEMA_VERSION ) {
+		if ( self::SCHEMA_VERSION === $from ) {
 			return;
 		}
 

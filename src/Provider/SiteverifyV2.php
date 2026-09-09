@@ -1,6 +1,6 @@
 <?php
 /**
- * reCAPTCHA v2 checkbox.
+ * Provider do reCAPTCHA v2 checkbox.
  *
  * @package WpRecaptchaForms
  */

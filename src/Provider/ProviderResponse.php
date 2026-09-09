@@ -79,7 +79,7 @@ final class ProviderResponse {
 	/**
 	 * Construtor.
 	 *
-	 * @param bool        $reached     O provedor respondeu?
+	 * @param bool        $reached     Se o provedor respondeu.
 	 * @param bool        $success     Campo success.
 	 * @param string|null $failure     Classe de falha (FailureClass::*).
 	 * @param float|null  $score       Score.

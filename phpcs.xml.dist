@@ -1,0 +1,162 @@
+<?xml version="1.0"?>
+<ruleset name="wp-recaptcha-forms">
+	<description>WordPress Coding Standards do wp-recaptcha-forms (Story 1.25).</description>
+
+	<!--
+		O que é varrido. `docs/` e `test-env/` ficam de fora: o primeiro não tem PHP, o
+		segundo é ambiente descartável de Docker e não é distribuído.
+	-->
+	<file>src</file>
+	<file>tests</file>
+	<file>bin</file>
+	<file>wp-recaptcha-forms.php</file>
+	<file>uninstall.php</file>
+
+	<exclude-pattern>*/vendor/*</exclude-pattern>
+	<exclude-pattern>*/node_modules/*</exclude-pattern>
+	<exclude-pattern>*/build/*</exclude-pattern>
+	<exclude-pattern>*/test-env/*</exclude-pattern>
+
+	<arg name="extensions" value="php"/>
+	<arg name="colors"/>
+	<arg name="basepath" value="."/>
+	<arg value="sp"/>
+	<arg name="parallel" value="8"/>
+
+	<!--
+		Piso declarado no header do plugin. O PHPCS usa isto para saber quais funções e
+		sintaxes ainda não existiam e não podem ser sugeridas.
+	-->
+	<config name="minimum_wp_version" value="6.0"/>
+	<config name="testVersion" value="7.4-"/>
+
+	<rule ref="WordPress-Extra"/>
+	<rule ref="WordPress-Docs"/>
+
+	<!--
+		Text domain único. Esta regra é metade do gate da Story 1.20: pega chamada de
+		tradução com domain errado ou ausente antes do pseudo-locale precisar pegar.
+	-->
+	<rule ref="WordPress.WP.I18n">
+		<properties>
+			<property name="text_domain" type="array">
+				<element value="wp-recaptcha-forms"/>
+			</property>
+		</properties>
+	</rule>
+
+	<!-- Prefixos globais do projeto (função, constante, hook, opção). -->
+	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+		<properties>
+			<!--
+				Só os prefixos longos: o sniff rejeita prefixo com menos de 4 caracteres,
+				e ele tem razão. `wrf_`/`WRF_` continua existindo como vocabulário de
+				campo de formulário (`wrf_token`) e como nome do kill switch definido
+				pelo operador no `wp-config.php` — nenhum dos dois é símbolo global
+				declarado pelo plugin, então nenhum deles precisa estar aqui.
+			-->
+			<property name="prefixes" type="array">
+				<element value="wp_recaptcha_forms"/>
+				<element value="WP_RECAPTCHA_FORMS"/>
+				<element value="WpRecaptchaForms"/>
+			</property>
+		</properties>
+	</rule>
+
+	<!--
+		Arquivos são PSR-4 (`src/Gate/Gate.php`), não `class-gate.php`: o autoloader do
+		plugin depende disso e o `composer.json` declara o mapa. A convenção de nome de
+		arquivo do WPCS é incompatível com PSR-4 por construção — exclusão deliberada,
+		não conveniência.
+	-->
+	<rule ref="WordPress.Files.FileName">
+		<properties>
+			<property name="strict_class_file_names" value="false"/>
+		</properties>
+		<exclude name="WordPress.Files.FileName.NotHyphenatedLowercase"/>
+	</rule>
+
+	<!--
+		Comentário de fim de bloco (`} // end foo()`) e alinhamento de `=` em bloco são
+		estilo antigo do core; o código do projeto não usa nenhum dos dois e forçá-los
+		agora só produziria ruído.
+	-->
+	<rule ref="Squiz.Commenting.LongConditionClosingComment">
+		<severity>0</severity>
+	</rule>
+	<rule ref="Generic.Formatting.MultipleStatementAlignment">
+		<severity>0</severity>
+	</rule>
+
+	<!--
+		Regras que só fazem sentido em código de tema/plugin que fala com o banco ou com
+		o sistema de arquivos direto. Este plugin não faz nem um nem outro.
+	-->
+	<rule ref="WordPress.DB">
+		<severity>0</severity>
+	</rule>
+
+	<!--
+		`$default` é o nome do parâmetro na assinatura do próprio core (`get_option`), e o
+		código do plugin espelha essas assinaturas de propósito. Renomear para agradar o
+		sniff tornaria a leitura pior, não melhor.
+	-->
+	<rule ref="Universal.NamingConventions.NoReservedKeywordParameterNames">
+		<severity>0</severity>
+	</rule>
+
+	<!--
+		Stubs de teste imitam o espaço global de funções do WordPress: por construção
+		misturam funções e classes num arquivo só, declaram várias classes juntas e têm
+		parâmetros que existem apenas para casar a assinatura do core. As regras abaixo
+		estão certas para código de produção e erradas para um arquivo de stub.
+	-->
+	<rule ref="Generic.Files.OneObjectStructurePerFile">
+		<exclude-pattern>tests/Support/*</exclude-pattern>
+	</rule>
+	<rule ref="Universal.Files.SeparateFunctionsFromOO">
+		<exclude-pattern>tests/Support/*</exclude-pattern>
+	</rule>
+	<rule ref="Generic.Commenting.DocComment.MissingShort">
+		<exclude-pattern>tests/Support/*</exclude-pattern>
+	</rule>
+	<rule ref="Squiz.Commenting.FunctionCommentThrowTag">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+	<rule ref="Generic.CodeAnalysis.UnusedFunctionParameter">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+
+	<!-- Testes: convenções próprias do PHPUnit. -->
+	<rule ref="WordPress.NamingConventions.ValidVariableName">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+		<exclude-pattern>tests/*</exclude-pattern>
+		<exclude-pattern>bin/*</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.WP.GlobalVariablesOverride">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+
+	<!--
+		`bin/` são scripts de manutenção rodados por CLI pelo mantenedor, nunca em
+		requisição web: não têm acesso a funções do WordPress e usam I/O direto de
+		propósito.
+	-->
+	<rule ref="WordPress.WP.AlternativeFunctions">
+		<exclude-pattern>bin/*</exclude-pattern>
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.Security.EscapeOutput">
+		<exclude-pattern>bin/*</exclude-pattern>
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.PHP.DiscouragedPHPFunctions">
+		<exclude-pattern>bin/*</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.PHP.DevelopmentFunctions">
+		<exclude-pattern>bin/*</exclude-pattern>
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+</ruleset>

@@ -259,9 +259,9 @@ final class GateTest extends TestCase {
 	 */
 	public function provide_unreachable_states(): array {
 		return array(
-			'script bloqueado'      => array( ClientState::NO_SCRIPT ),
+			'script bloqueado'       => array( ClientState::NO_SCRIPT ),
 			'consentimento pendente' => array( ClientState::CONSENT_PENDING ),
-			'execucao falhou'       => array( ClientState::EXEC_ERROR ),
+			'execucao falhou'        => array( ClientState::EXEC_ERROR ),
 		);
 	}
 

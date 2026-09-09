@@ -57,7 +57,7 @@ final class Verdict {
 	/**
 	 * Construtor.
 	 *
-	 * @param bool        $allowed     Passa?
+	 * @param bool        $allowed     Se o envio passa.
 	 * @param string|null $failure     FailureClass::*.
 	 * @param string      $message     Mensagem traduzida.
 	 * @param string|null $reason      Motivo.

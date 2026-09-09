@@ -107,7 +107,7 @@ if ( ! function_exists( 'wp_recaptcha_forms_set_consent' ) ) {
 	/**
 	 * Declara o consentimento no lado servidor, sem precisar de closure no filtro.
 	 *
-	 * @param bool $granted Concedido?
+	 * @param bool $granted Se o consentimento foi concedido.
 	 * @return void
 	 */
 	function wp_recaptcha_forms_set_consent( bool $granted ): void {

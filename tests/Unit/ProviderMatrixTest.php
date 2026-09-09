@@ -108,11 +108,11 @@ final class ProviderMatrixTest extends TestCase {
 	 */
 	public function provide_infra_scenarios(): array {
 		return array(
-			'erro de transporte' => array( static fn( FakeTransport $f ) => $f->will_fail( 'http_request_failed' ) ),
-			'HTTP 503'           => array( static fn( FakeTransport $f ) => $f->will_return_raw( 503, '' ) ),
-			'HTTP 429'           => array( static fn( FakeTransport $f ) => $f->will_return_raw( 429, '' ) ),
-			'corpo nao-JSON'     => array( static fn( FakeTransport $f ) => $f->will_return_raw( 200, '<html>oops</html>' ) ),
-			'corpo vazio'        => array( static fn( FakeTransport $f ) => $f->will_return_raw( 200, '' ) ),
+			'erro de transporte'  => array( static fn( FakeTransport $f ) => $f->will_fail( 'http_request_failed' ) ),
+			'HTTP 503'            => array( static fn( FakeTransport $f ) => $f->will_return_raw( 503, '' ) ),
+			'HTTP 429'            => array( static fn( FakeTransport $f ) => $f->will_return_raw( 429, '' ) ),
+			'corpo nao-JSON'      => array( static fn( FakeTransport $f ) => $f->will_return_raw( 200, '<html>oops</html>' ) ),
+			'corpo vazio'         => array( static fn( FakeTransport $f ) => $f->will_return_raw( 200, '' ) ),
 			'codigo desconhecido' => array(
 				static fn( FakeTransport $f ) => $f->will_return_json(
 					array(
@@ -394,13 +394,25 @@ final class ProviderMatrixTest extends TestCase {
 	 * @return void
 	 */
 	public function test_remote_ip_toggle(): void {
-		$fake = ( new FakeTransport() )->will_return_json( array( 'success' => true, 'score' => 0.9, 'action' => 'wrf_wp_login' ) );
+		$fake = ( new FakeTransport() )->will_return_json(
+			array(
+				'success' => true,
+				'score'   => 0.9,
+				'action'  => 'wrf_wp_login',
+			)
+		);
 		( new Gate( ProviderFactory::for_version( 'v3', $fake ) ) )->assess( $this->context() );
 		$this->assertArrayHasKey( 'remoteip', $fake->calls[0]['body'] );
 
 		$this->configure( array( 'remoteip' => false ) );
 
-		$fake2 = ( new FakeTransport() )->will_return_json( array( 'success' => true, 'score' => 0.9, 'action' => 'wrf_wp_login' ) );
+		$fake2 = ( new FakeTransport() )->will_return_json(
+			array(
+				'success' => true,
+				'score'   => 0.9,
+				'action'  => 'wrf_wp_login',
+			)
+		);
 		( new Gate( ProviderFactory::for_version( 'v3', $fake2 ) ) )->assess( $this->context() );
 		$this->assertArrayNotHasKey( 'remoteip', $fake2->calls[0]['body'] );
 	}

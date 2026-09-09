@@ -1,6 +1,6 @@
 <?php
 /**
- * reCAPTCHA v3 (invisível, por score).
+ * Provider do reCAPTCHA v3 (invisível, por score).
  *
  * @package WpRecaptchaForms
  */

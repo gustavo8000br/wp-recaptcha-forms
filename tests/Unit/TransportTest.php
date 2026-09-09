@@ -37,7 +37,13 @@ final class TransportTest extends TestCase {
 
 		$this->assertFalse( $result->is_error() );
 		$this->assertSame( 200, $result->status() );
-		$this->assertSame( array( 'success' => true, 'score' => 0.9 ), $result->json() );
+		$this->assertSame(
+			array(
+				'success' => true,
+				'score'   => 0.9,
+			),
+			$result->json()
+		);
 	}
 
 	/**

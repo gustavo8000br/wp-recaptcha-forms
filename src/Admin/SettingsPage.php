@@ -29,7 +29,7 @@ final class SettingsPage {
 	/** Slug da página. */
 	const SLUG = 'wp-recaptcha-forms';
 
-    /** Grupo de opções da Settings API. */
+	/** Grupo de opções da Settings API. */
 	const GROUP = 'wp_recaptcha_forms_group';
 
 	/**
@@ -246,7 +246,7 @@ final class SettingsPage {
 
 		$this->render_keys_section( $options );
 		$this->render_failure_section( $options );
-		$this->render_forms_section( $options );
+		$this->render_forms_section();
 		$this->render_messages_section( $options );
 
 		submit_button();
@@ -401,7 +401,7 @@ final class SettingsPage {
 	 * @param string $field    Nome do campo.
 	 * @param string $id       Id.
 	 * @param string $value    Valor atual.
-	 * @param bool   $inherit  Inclui a opção "herdar"?
+	 * @param bool   $inherit  Se inclui a opção "herdar".
 	 * @return void
 	 */
 	private function render_policy_select( string $field, string $id, string $value, bool $inherit ): void {
@@ -419,10 +419,13 @@ final class SettingsPage {
 	/**
 	 * Matriz de formulários, gerada a partir do Registry.
 	 *
-	 * @param array $options Opções.
+	 * Não recebe as opções salvas: cada linha lê o próprio estado do Registry e de
+	 * `Options`, e uma cópia passada por parâmetro só criaria uma segunda fonte de
+	 * verdade para o mesmo dado.
+	 *
 	 * @return void
 	 */
-	private function render_forms_section( array $options ): void {
+	private function render_forms_section(): void {
 		$grouped = Registry::instance()->grouped();
 
 		echo '<h2>' . esc_html__( 'Formulários protegidos', 'wp-recaptcha-forms' ) . '</h2>';
@@ -448,7 +451,6 @@ final class SettingsPage {
 				$id        = $integration->id();
 				$form      = Options::form( $id );
 				$available = $integration->available();
-				$disabled  = $available ? '' : ' disabled';
 
 				echo '<tr>';
 				echo '<td><strong>' . esc_html( $integration->label() ) . '</strong>';
@@ -459,7 +461,7 @@ final class SettingsPage {
 
 				echo '</td>';
 
-				echo '<td><label><input type="checkbox" name="' . esc_attr( $name ) . '[forms][' . esc_attr( $id ) . '][enabled]" value="1" ' . checked( true, (bool) $form['enabled'], false ) . $disabled . '></label></td>';
+				echo '<td><label><input type="checkbox" name="' . esc_attr( $name ) . '[forms][' . esc_attr( $id ) . '][enabled]" value="1" ' . checked( true, (bool) $form['enabled'], false ) . disabled( $available, false, false ) . '></label></td>';
 
 				echo '<td>';
 				$this->render_policy_select( $name . '[forms][' . $id . '][policy_infra]', 'wrf-' . $id . '-infra', (string) $form['policy_infra'], true );

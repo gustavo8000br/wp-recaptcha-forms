@@ -101,7 +101,8 @@ final class AssetManager {
 			self::HANDLE_PROVIDER,
 			$provider->script_url( Options::site_key(), (string) $locale ),
 			array(),
-			null, // A URL do provedor já carrega a própria versão; acrescentar `ver` quebraria o cache dele.
+			// A URL do provedor já carrega a própria versão; acrescentar `ver` quebraria o cache dele.
+			null, // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
 			true
 		);
 
