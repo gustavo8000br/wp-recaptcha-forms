@@ -58,7 +58,7 @@ foreach ( $wrf_pot as $wrf_entry ) {
 	}
 
 	$wrf_lines[] = '';
-	$wrf_count++;
+	++$wrf_count;
 }
 
 file_put_contents( $wrf_out, implode( "\n", $wrf_lines ) );

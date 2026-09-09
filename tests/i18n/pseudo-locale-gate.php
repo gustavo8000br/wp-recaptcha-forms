@@ -226,12 +226,12 @@ function wrf_gate_leaks( string $html, array $allowlist ): array {
 	}
 
 	// 4. Valores que não são copy do plugin e portanto não são traduzíveis:
-	//    - chaves e ids que o operador digitou ou que nomeiam formulários;
-	//    - códigos de erro crus devolvidos pelo Google, exibidos no notice de MISCONFIG
-	//      para o operador copiar num chamado de suporte. Traduzir `invalid-input-secret`
-	//      seria ativamente prejudicial — é o literal que ele vai buscar na documentação.
-	//    Isto é o AC 3 ("valores de opção do operador são excluídos da varredura"), não
-	//    uma frouxidão do gate: nenhuma frase inteira cabe nestes padrões.
+	// - chaves e ids que o operador digitou ou que nomeiam formulários;
+	// - códigos de erro crus devolvidos pelo Google, exibidos no notice de MISCONFIG
+	// para o operador copiar num chamado de suporte. Traduzir `invalid-input-secret`
+	// seria ativamente prejudicial — é o literal que ele vai buscar na documentação.
+	// Isto é o AC 3 ("valores de opção do operador são excluídos da varredura"), não
+	// uma frouxidão do gate: nenhuma frase inteira cabe nestes padrões.
 	$rest = preg_replace( '/\b(site-key|secret-key|wp_login|wrf_[a-z_]+|v[23])\b/ui', ' ', (string) $rest );
 	$rest = preg_replace( '/\b(invalid|missing|bad|timeout)-[a-z-]+\b/ui', ' ', (string) $rest );
 

@@ -123,6 +123,8 @@ final class Plugin {
 	 * @return void
 	 */
 	public function load_textdomain(): void {
+		I18n::boot();
+
 		load_plugin_textdomain(
 			'wp-recaptcha-forms',
 			false,

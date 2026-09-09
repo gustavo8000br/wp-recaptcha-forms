@@ -25,20 +25,90 @@ const WRF_TEXT_DOMAIN = 'wp-recaptcha-forms';
  * text domain. `null` = a função não tem aquele argumento.
  */
 const WRF_GETTEXT_FUNCTIONS = array(
-	'__'             => array( 'single' => 0, 'plural' => null, 'context' => null, 'domain' => 1 ),
-	'_e'             => array( 'single' => 0, 'plural' => null, 'context' => null, 'domain' => 1 ),
-	'esc_html__'     => array( 'single' => 0, 'plural' => null, 'context' => null, 'domain' => 1 ),
-	'esc_html_e'     => array( 'single' => 0, 'plural' => null, 'context' => null, 'domain' => 1 ),
-	'esc_attr__'     => array( 'single' => 0, 'plural' => null, 'context' => null, 'domain' => 1 ),
-	'esc_attr_e'     => array( 'single' => 0, 'plural' => null, 'context' => null, 'domain' => 1 ),
-	'_x'             => array( 'single' => 0, 'plural' => null, 'context' => 1, 'domain' => 2 ),
-	'_ex'            => array( 'single' => 0, 'plural' => null, 'context' => 1, 'domain' => 2 ),
-	'esc_html_x'     => array( 'single' => 0, 'plural' => null, 'context' => 1, 'domain' => 2 ),
-	'esc_attr_x'     => array( 'single' => 0, 'plural' => null, 'context' => 1, 'domain' => 2 ),
-	'_n'             => array( 'single' => 0, 'plural' => 1, 'context' => null, 'domain' => 3 ),
-	'_nx'            => array( 'single' => 0, 'plural' => 1, 'context' => 3, 'domain' => 4 ),
-	'_n_noop'        => array( 'single' => 0, 'plural' => 1, 'context' => null, 'domain' => 2 ),
-	'_nx_noop'       => array( 'single' => 0, 'plural' => 1, 'context' => 2, 'domain' => 3 ),
+	'__'         => array(
+		'single'  => 0,
+		'plural'  => null,
+		'context' => null,
+		'domain'  => 1,
+	),
+	'_e'         => array(
+		'single'  => 0,
+		'plural'  => null,
+		'context' => null,
+		'domain'  => 1,
+	),
+	'esc_html__' => array(
+		'single'  => 0,
+		'plural'  => null,
+		'context' => null,
+		'domain'  => 1,
+	),
+	'esc_html_e' => array(
+		'single'  => 0,
+		'plural'  => null,
+		'context' => null,
+		'domain'  => 1,
+	),
+	'esc_attr__' => array(
+		'single'  => 0,
+		'plural'  => null,
+		'context' => null,
+		'domain'  => 1,
+	),
+	'esc_attr_e' => array(
+		'single'  => 0,
+		'plural'  => null,
+		'context' => null,
+		'domain'  => 1,
+	),
+	'_x'         => array(
+		'single'  => 0,
+		'plural'  => null,
+		'context' => 1,
+		'domain'  => 2,
+	),
+	'_ex'        => array(
+		'single'  => 0,
+		'plural'  => null,
+		'context' => 1,
+		'domain'  => 2,
+	),
+	'esc_html_x' => array(
+		'single'  => 0,
+		'plural'  => null,
+		'context' => 1,
+		'domain'  => 2,
+	),
+	'esc_attr_x' => array(
+		'single'  => 0,
+		'plural'  => null,
+		'context' => 1,
+		'domain'  => 2,
+	),
+	'_n'         => array(
+		'single'  => 0,
+		'plural'  => 1,
+		'context' => null,
+		'domain'  => 3,
+	),
+	'_nx'        => array(
+		'single'  => 0,
+		'plural'  => 1,
+		'context' => 3,
+		'domain'  => 4,
+	),
+	'_n_noop'    => array(
+		'single'  => 0,
+		'plural'  => 1,
+		'context' => null,
+		'domain'  => 2,
+	),
+	'_nx_noop'   => array(
+		'single'  => 0,
+		'plural'  => 1,
+		'context' => 2,
+		'domain'  => 3,
+	),
 );
 
 /**
@@ -194,7 +264,7 @@ function wrf_pot_arguments( array $tokens, int $index, int $count ): ?array {
 	$i = $index + 1;
 
 	while ( $i < $count && is_array( $tokens[ $i ] ) && T_WHITESPACE === $tokens[ $i ][0] ) {
-		$i++;
+		++$i;
 	}
 
 	if ( $i >= $count || '(' !== $tokens[ $i ] ) {
@@ -211,7 +281,7 @@ function wrf_pot_arguments( array $tokens, int $index, int $count ): ?array {
 		$token = $tokens[ $i ];
 
 		if ( '(' === $token ) {
-			$depth++;
+			++$depth;
 
 			if ( 1 === $depth ) {
 				continue;
@@ -219,7 +289,7 @@ function wrf_pot_arguments( array $tokens, int $index, int $count ): ?array {
 		}
 
 		if ( ')' === $token ) {
-			$depth--;
+			--$depth;
 
 			if ( 0 === $depth ) {
 				$args[ $position ] = $simple ? $literal : null;
@@ -230,7 +300,7 @@ function wrf_pot_arguments( array $tokens, int $index, int $count ): ?array {
 
 		if ( 1 === $depth && ',' === $token ) {
 			$args[ $position ] = $simple ? $literal : null;
-			$position++;
+			++$position;
 			$literal = '';
 			$simple  = true;
 			continue;
@@ -268,7 +338,7 @@ function wrf_pot_unquote( string $raw ): string {
 	$body  = substr( $raw, 1, -1 );
 
 	if ( "'" === $quote ) {
-		return str_replace( array( "\\\\", "\\'" ), array( '\\', "'" ), $body );
+		return str_replace( array( '\\\\', "\\'" ), array( '\\', "'" ), $body );
 	}
 
 	return stripcslashes( $body );

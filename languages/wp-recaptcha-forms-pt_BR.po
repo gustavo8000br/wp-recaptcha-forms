@@ -1,0 +1,319 @@
+# Português do Brasil translation for WP reCAPTCHA Forms.
+# Copyright (C) 2026 Gustavo Mathias Rocha
+# This file is distributed under the GPL-2.0-or-later license.
+msgid ""
+msgstr ""
+"Project-Id-Version: WP reCAPTCHA Forms\n"
+"Report-Msgid-Bugs-To: https://github.com/gustavo8000br/wp-recaptcha-forms/issues\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: pt_BR\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Domain: wp-recaptcha-forms\n"
+
+msgid "A constante WRF_DISABLE está definida em wp-config.php. Nenhum formulário está sendo verificado pelo reCAPTCHA. Remova a constante para retomar a proteção."
+msgstr "A constante WRF_DISABLE está definida em wp-config.php. Nenhum formulário está sendo verificado pelo reCAPTCHA. Remova a constante para retomar a proteção."
+
+msgid "A proteção do WP reCAPTCHA Forms está desativada pela constante WRF_DISABLE em wp-config.php. Nenhum formulário está sendo verificado."
+msgstr "A proteção do WP reCAPTCHA Forms está desativada pela constante WRF_DISABLE em wp-config.php. Nenhum formulário está sendo verificado."
+
+msgid "A proteção do WP reCAPTCHA Forms está desativada por constante"
+msgstr "A proteção do WP reCAPTCHA Forms está desativada por constante"
+
+msgid "A secret key foi recusada pelo Google e não foi salva. Confira se você copiou a secret key (não a site key) do mesmo projeto no console."
+msgstr "A secret key foi recusada pelo Google e não foi salva. Confira se você copiou a secret key (não a site key) do mesmo projeto no console."
+
+msgid "A secret key foi salva, mas não foi possível validá-la agora: o servidor não conseguiu falar com o Google. A validação acontece de novo na primeira verificação real."
+msgstr "A secret key foi salva, mas não foi possível validá-la agora: o servidor não conseguiu falar com o Google. A validação acontece de novo na primeira verificação real."
+
+msgid "A verificação de segurança está temporariamente indisponível. Tente novamente em instantes."
+msgstr "A verificação de segurança está temporariamente indisponível. Tente novamente em instantes."
+
+msgid "Abrir as configurações"
+msgstr "Abrir as configurações"
+
+msgid "Ainda não configurado — informe a site key e a secret key para começar a proteger os formulários."
+msgstr "Ainda não configurado — informe a site key e a secret key para começar a proteger os formulários."
+
+msgid "Além disso, o endereço IP do visitante é enviado ao Google pelo servidor deste site, junto com a verificação de cada envio de formulário."
+msgstr "Além disso, o endereço IP do visitante é enviado ao Google pelo servidor deste site, junto com a verificação de cada envio de formulário."
+
+msgid "As chaves do reCAPTCHA foram recusadas pelo Google. Os formulários continuam funcionando, mas sem verificação alguma."
+msgstr "As chaves do reCAPTCHA foram recusadas pelo Google. Os formulários continuam funcionando, mas sem verificação alguma."
+
+msgid "As chaves do v2 e do v3 não são intercambiáveis. Ao trocar de versão, gere um par de chaves novo no console do Google para a versão escolhida."
+msgstr "As chaves do v2 e do v3 não são intercambiáveis. Ao trocar de versão, gere um par de chaves novo no console do Google para a versão escolhida."
+
+msgid "As verificações estão funcionando."
+msgstr "As verificações estão funcionando."
+
+msgid "Automático — respeita a WP Consent API, se houver"
+msgstr "Automático — respeita a WP Consent API, se houver"
+
+msgid "Avaliações de produto"
+msgstr "Avaliações de produto"
+
+msgid "Aviso exibido no próprio formulário"
+msgstr "Aviso exibido no próprio formulário"
+
+msgid "Bloquear o envio"
+msgstr "Bloquear o envio"
+
+msgid "Build: %s"
+msgstr "Build: %s"
+
+msgid "Chaves e versão"
+msgstr "Chaves e versão"
+
+msgid "Checkout (clássico e Blocks)"
+msgstr "Checkout (clássico e Blocks)"
+
+msgid "Com esta opção em \"permitir\", um visitante cujo navegador não consegue carregar o reCAPTCHA envia o formulário sem verificação. Isso preserva a venda de clientes com bloqueador de anúncios — e também deixa passar um robô que simule a mesma condição. Em \"bloquear\", nenhum envio não verificado passa, e visitantes com bloqueador não conseguem comprar, comentar nem se registrar."
+msgstr "Com esta opção em \"permitir\", um visitante cujo navegador não consegue carregar o reCAPTCHA envia o formulário sem verificação. Isso preserva a venda de clientes com bloqueador de anúncios — e também deixa passar um robô que simule a mesma condição. Em \"bloquear\", nenhum envio não verificado passa, e visitantes com bloqueador não conseguem comprar, comentar nem se registrar."
+
+msgid "Comentário bloqueado"
+msgstr "Comentário bloqueado"
+
+msgid "Comentários"
+msgstr "Comentários"
+
+msgid "Configurações"
+msgstr "Configurações"
+
+msgid "Consentimento antes de carregar o script do Google"
+msgstr "Consentimento antes de carregar o script do Google"
+
+msgid "Consentimento: automático (%s). Sem provedor, o comportamento é o mesmo de \"não exigir\"."
+msgstr "Consentimento: automático (%s). Sem provedor, o comportamento é o mesmo de \"não exigir\"."
+
+msgid "Consentimento: exigido (%s). Sem sinal de consentimento o script do Google não é carregado e os envios chegam como \"navegador não alcançou o Google\"."
+msgstr "Consentimento: exigido (%s). Sem sinal de consentimento o script do Google não é carregado e os envios chegam como \"navegador não alcançou o Google\"."
+
+msgid "Consentimento: não exigido — o script do Google carrega em toda página com formulário protegido."
+msgstr "Consentimento: não exigido — o script do Google carrega em toda página com formulário protegido."
+
+msgid "Definida pela constante WP_RECAPTCHA_FORMS_SECRET_KEY em wp-config.php, que tem precedência sobre este campo."
+msgstr "Definida pela constante WP_RECAPTCHA_FORMS_SECRET_KEY em wp-config.php, que tem precedência sobre este campo."
+
+msgid "Degradado — não verificando. As chaves foram recusadas pelo Google e os formulários estão passando sem verificação."
+msgstr "Degradado — não verificando. As chaves foram recusadas pelo Google e os formulários estão passando sem verificação."
+
+msgid "Deixe em branco para manter a secret atual. Ao salvar uma secret nova, ela é validada com o Google — o que prova que a secret está correta, mas não prova que a site key é do mesmo projeto."
+msgstr "Deixe em branco para manter a secret atual. Ao salvar uma secret nova, ela é validada com o Google — o que prova que a secret está correta, mas não prova que a site key é do mesmo projeto."
+
+msgid "Deixe em branco para usar o texto padrão, já traduzido."
+msgstr "Deixe em branco para usar o texto padrão, já traduzido."
+
+msgid "Desativado — a constante WRF_DISABLE está definida em wp-config.php e nenhum formulário está sendo verificado."
+msgstr "Desativado — a constante WRF_DISABLE está definida em wp-config.php e nenhum formulário está sendo verificado."
+
+msgid "Enviar o endereço IP do visitante ao Google junto com a verificação"
+msgstr "Enviar o endereço IP do visitante ao Google junto com a verificação"
+
+msgid "Envio reprovado pelo Google"
+msgstr "Envio reprovado pelo Google"
+
+msgid "Envios com score abaixo deste valor são bloqueados. 0.6 é um ponto de partida conservador. Só vale para o v3."
+msgstr "Envios com score abaixo deste valor são bloqueados. 0.6 é um ponto de partida conservador. Só vale para o v3."
+
+msgid "Envios que o Google verificou e reprovou são sempre bloqueados — isso não é configurável, porque torná-lo configurável desligaria o plugin por padrão."
+msgstr "Envios que o Google verificou e reprovou são sempre bloqueados — isso não é configurável, porque torná-lo configurável desligaria o plugin por padrão."
+
+msgid "Esse processamento está sujeito à Política de Privacidade (%1$s) e aos Termos de Serviço (%2$s) do Google."
+msgstr "Esse processamento está sujeito à Política de Privacidade (%1$s) e aos Termos de Serviço (%2$s) do Google."
+
+msgid "Estado declarado pelo navegador quando a verificação não pôde ser obtida."
+msgstr "Estado declarado pelo navegador quando a verificação não pôde ser obtida."
+
+msgid "Este site usa o reCAPTCHA do Google para proteger formulários contra envios automatizados. Ao interagir com um formulário protegido, o seu navegador carrega um script servido pelo Google, o que expõe ao Google o seu endereço IP, informações do navegador e cookies do domínio google.com."
+msgstr "Este site usa o reCAPTCHA do Google para proteger formulários contra envios automatizados. Ao interagir com um formulário protegido, o seu navegador carrega um script servido pelo Google, o que expõe ao Google o seu endereço IP, informações do navegador e cookies do domínio google.com."
+
+msgid "Este texto é um ponto de partida para a sua política de privacidade. Ele não é aconselhamento jurídico e não torna a instalação conforme à LGPD ou ao GDPR."
+msgstr "Este texto é um ponto de partida para a sua política de privacidade. Ele não é aconselhamento jurídico e não torna a instalação conforme à LGPD ou ao GDPR."
+
+msgid "Exigir — não carrega sem consentimento explícito"
+msgstr "Exigir — não carrega sem consentimento explícito"
+
+msgid "Formulário"
+msgstr "Formulário"
+
+msgid "Formulários protegidos"
+msgstr "Formulários protegidos"
+
+msgid "Google Cloud / reCAPTCHA Enterprise"
+msgstr "Google Cloud / reCAPTCHA Enterprise"
+
+msgid "Herdar do global"
+msgstr "Herdar do global"
+
+msgid "Informe a site key e a secret key para que os formulários passem a ser verificados."
+msgstr "Informe a site key e a secret key para que os formulários passem a ser verificados."
+
+msgid "Inscrição bloqueada"
+msgstr "Inscrição bloqueada"
+
+msgid "Inscrição na newsletter"
+msgstr "Inscrição na newsletter"
+
+msgid "Login"
+msgstr "Login"
+
+msgid "Melhora a qualidade do score. Desligar não impede que o Google receba o IP: o script do reCAPTCHA é carregado do domínio do Google pelo navegador do visitante."
+msgstr "Melhora a qualidade do score. Desligar não impede que o Google receba o IP: o script do reCAPTCHA é carregado do domínio do Google pelo navegador do visitante."
+
+msgid "Mensagens"
+msgstr "Mensagens"
+
+msgid "Nenhuma integração de formulário está registrada nesta instalação."
+msgstr "Nenhuma integração de formulário está registrada nesta instalação."
+
+msgid "Newsletter"
+msgstr "Newsletter"
+
+msgid "Não conseguimos verificar sua sessão porque a verificação de segurança não carregou no seu navegador. Desative o bloqueador de anúncios (ou aceite os cookies) para esta página e tente novamente."
+msgstr "Não conseguimos verificar sua sessão porque a verificação de segurança não carregou no seu navegador. Desative o bloqueador de anúncios (ou aceite os cookies) para esta página e tente novamente."
+
+msgid "Não exigir — carrega sempre"
+msgstr "Não exigir — carrega sempre"
+
+msgid "Não foi possível carregar a verificação de segurança do Google. Se você usa bloqueador de anúncios ou recusou os cookies, desative-o para esta página e tente novamente."
+msgstr "Não foi possível carregar a verificação de segurança do Google. Se você usa bloqueador de anúncios ou recusou os cookies, desative-o para esta página e tente novamente."
+
+msgid "Não foi possível confirmar que você não é um robô. Recarregue a página e tente novamente."
+msgstr "Não foi possível confirmar que você não é um robô. Recarregue a página e tente novamente."
+
+msgid "O WP reCAPTCHA Forms ainda não foi configurado"
+msgstr "O WP reCAPTCHA Forms ainda não foi configurado"
+
+msgid "O WP reCAPTCHA Forms está protegendo os formulários"
+msgstr "O WP reCAPTCHA Forms está protegendo os formulários"
+
+msgid "O WP reCAPTCHA Forms não está verificando os formulários"
+msgstr "O WP reCAPTCHA Forms não está verificando os formulários"
+
+msgid "O checkout em Blocks requer WooCommerce %s ou superior. O checkout clássico continua protegido."
+msgstr "O checkout em Blocks requer WooCommerce %s ou superior. O checkout clássico continua protegido."
+
+msgid "O navegador do visitante não carregou o reCAPTCHA"
+msgstr "O navegador do visitante não carregou o reCAPTCHA"
+
+msgid "O plugin não se integra a nenhuma plataforma de consentimento pelo nome: ele publica um contrato (um filtro no PHP e uma função no JavaScript) que qualquer uma pode chamar. O README traz os trechos prontos."
+msgstr "O plugin não se integra a nenhuma plataforma de consentimento pelo nome: ele publica um contrato (um filtro no PHP e uma função no JavaScript) que qualquer uma pode chamar. O README traz os trechos prontos."
+
+msgid "O script do reCAPTCHA só é carregado depois que o visitante concede consentimento para cookies e scripts de terceiros."
+msgstr "O script do reCAPTCHA só é carregado depois que o visitante concede consentimento para cookies e scripts de terceiros."
+
+msgid "O script do reCAPTCHA é carregado apenas nas páginas que contêm um formulário protegido — em qualquer outra página do site, o seu navegador não fala com o Google por causa deste recurso."
+msgstr "O script do reCAPTCHA é carregado apenas nas páginas que contêm um formulário protegido — em qualquer outra página do site, o seu navegador não fala com o Google por causa deste recurso."
+
+msgid "O servidor deste site não envia o endereço IP do visitante ao Google junto com a verificação. Desligar esse envio não impede que o Google receba o endereço IP, porque o script do reCAPTCHA é carregado diretamente do domínio do Google pelo navegador do visitante."
+msgstr "O servidor deste site não envia o endereço IP do visitante ao Google junto com a verificação. Desligar esse envio não impede que o Google receba o endereço IP, porque o script do reCAPTCHA é carregado diretamente do domínio do Google pelo navegador do visitante."
+
+msgid "Onde obter as chaves:"
+msgstr "Onde obter as chaves:"
+
+msgid "Os formulários estão sendo enviados SEM verificação até que isso seja corrigido."
+msgstr "Os formulários estão sendo enviados SEM verificação até que isso seja corrigido."
+
+msgid "Permitir o envio"
+msgstr "Permitir o envio"
+
+msgid "Privacidade"
+msgstr "Privacidade"
+
+msgid "Protegendo — as verificações estão funcionando."
+msgstr "Protegendo — as verificações estão funcionando."
+
+msgid "Proteger"
+msgstr "Proteger"
+
+msgid "Proteção do WP reCAPTCHA Forms"
+msgstr "Proteção do WP reCAPTCHA Forms"
+
+msgid "Quando a verificação não for possível"
+msgstr "Quando a verificação não for possível"
+
+msgid "Recuperação de senha (Minha conta)"
+msgstr "Recuperação de senha (Minha conta)"
+
+msgid "Recuperação de senha (WordPress)"
+msgstr "Recuperação de senha (WordPress)"
+
+msgid "Registro de usuário"
+msgstr "Registro de usuário"
+
+msgid "Se o navegador do visitante não conseguir carregar o reCAPTCHA (bloqueador de anúncios, cookies recusados)"
+msgstr "Se o navegador do visitante não conseguir carregar o reCAPTCHA (bloqueador de anúncios, cookies recusados)"
+
+msgid "Se o navegador não carregar o reCAPTCHA"
+msgstr "Se o navegador não carregar o reCAPTCHA"
+
+msgid "Se o nosso servidor não conseguir falar com o Google"
+msgstr "Se o nosso servidor não conseguir falar com o Google"
+
+msgid "Se o servidor não alcançar o Google"
+msgstr "Se o servidor não alcançar o Google"
+
+msgid "Secret key"
+msgstr "Secret key"
+
+msgid "Secret key validada com o Google. (Esta checagem não prova que a site key pertence ao mesmo projeto — isso só aparece em uma verificação real.)"
+msgstr "Secret key validada com o Google. (Esta checagem não prova que a site key pertence ao mesmo projeto — isso só aparece em uma verificação real.)"
+
+msgid "Segurança"
+msgstr "Segurança"
+
+msgid "Site key"
+msgstr "Site key"
+
+msgid "Threshold de score (v3)"
+msgstr "Threshold de score (v3)"
+
+msgid "Token de verificação obtido no navegador."
+msgstr "Token de verificação obtido no navegador."
+
+msgid "Verificação indisponível para o servidor"
+msgstr "Verificação indisponível para o servidor"
+
+msgid "Versão do reCAPTCHA"
+msgstr "Versão do reCAPTCHA"
+
+msgid "Você não tem permissão para acessar esta página."
+msgstr "Você não tem permissão para acessar esta página."
+
+msgid "WP Consent API detectada"
+msgstr "WP Consent API detectada"
+
+msgid "WP reCAPTCHA Forms"
+msgstr "WP reCAPTCHA Forms"
+
+msgid "WP reCAPTCHA Forms requer PHP %1$s ou superior. Esta instalação usa PHP %2$s, então o plugin está inativo."
+msgstr "WP reCAPTCHA Forms requer PHP %1$s ou superior. Esta instalação usa PHP %2$s, então o plugin está inativo."
+
+msgid "WP reCAPTCHA Forms: as chaves foram recusadas pelo Google."
+msgstr "WP reCAPTCHA Forms: as chaves foram recusadas pelo Google."
+
+msgid "WP reCAPTCHA Forms: todas as verificações recentes falharam. A causa mais provável é a site key e a secret key pertencerem a projetos diferentes no console do Google. Confira as duas chaves."
+msgstr "WP reCAPTCHA Forms: todas as verificações recentes falharam. A causa mais provável é a site key e a secret key pertencerem a projetos diferentes no console do Google. Confira as duas chaves."
+
+msgid "WooCommerce"
+msgstr "WooCommerce"
+
+msgid "WordPress"
+msgstr "WordPress"
+
+msgid "ainda não configurada"
+msgstr "ainda não configurada"
+
+msgid "console clássico do reCAPTCHA (recomendado)"
+msgstr "console clássico do reCAPTCHA (recomendado)"
+
+msgid "nenhum provedor detectado"
+msgstr "nenhum provedor detectado"
+
+msgid "v2 (caixa \"Não sou um robô\")"
+msgstr "v2 (caixa \"Não sou um robô\")"
+
+msgid "v3 (invisível, por score) — recomendado"
+msgstr "v3 (invisível, por score) — recomendado"
