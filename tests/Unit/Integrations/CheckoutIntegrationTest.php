@@ -5,7 +5,7 @@
  * @package WpRecaptchaForms
  */
 
-namespace WpRecaptchaForms\Tests\Unit;
+namespace WpRecaptchaForms\Tests\Unit\Integrations;
 
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use PHPUnit\Framework\TestCase;

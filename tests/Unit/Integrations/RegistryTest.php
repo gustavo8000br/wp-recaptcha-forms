@@ -5,7 +5,7 @@
  * @package WpRecaptchaForms
  */
 
-namespace WpRecaptchaForms\Tests\Unit;
+namespace WpRecaptchaForms\Tests\Unit\Integrations;
 
 use PHPUnit\Framework\TestCase;
 use WpRecaptchaForms\Integrations\Core\CommentIntegration;

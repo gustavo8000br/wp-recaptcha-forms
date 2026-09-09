@@ -5,7 +5,7 @@
  * @package WpRecaptchaForms
  */
 
-namespace WpRecaptchaForms\Tests\Unit;
+namespace WpRecaptchaForms\Tests\Unit\Integrations;
 
 use PHPUnit\Framework\TestCase;
 use WpRecaptchaForms\Autoloader;
@@ -28,7 +28,7 @@ final class ConditionalLoadTest extends TestCase {
 	 */
 	private function annotated_files(): array {
 		$found    = array();
-		$iterator = new \RecursiveIteratorIterator( new \RecursiveDirectoryIterator( dirname( __DIR__, 2 ) . '/src' ) );
+		$iterator = new \RecursiveIteratorIterator( new \RecursiveDirectoryIterator( WP_RECAPTCHA_FORMS_DIR . 'src' ) );
 
 		foreach ( $iterator as $file ) {
 			if ( ! $file->isFile() || 'php' !== $file->getExtension() ) {

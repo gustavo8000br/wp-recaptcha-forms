@@ -8,7 +8,7 @@
  * @package WpRecaptchaForms
  */
 
-namespace WpRecaptchaForms\Tests\Unit;
+namespace WpRecaptchaForms\Tests\Unit\Admin;
 
 use PHPUnit\Framework\TestCase;
 use WpRecaptchaForms\Admin\SettingsPage;

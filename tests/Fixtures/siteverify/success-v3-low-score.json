@@ -1,0 +1,7 @@
+{
+  "success": true,
+  "challenge_ts": "2026-09-09T12:00:00Z",
+  "hostname": "example.test",
+  "score": 0.3,
+  "action": "wrf_wp_login"
+}

@@ -5,7 +5,7 @@
  * @package WpRecaptchaForms
  */
 
-namespace WpRecaptchaForms\Tests\Unit;
+namespace WpRecaptchaForms\Tests\Unit\I18n;
 
 use PHPUnit\Framework\TestCase;
 use WpRecaptchaForms\I18n;

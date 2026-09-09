@@ -5,7 +5,7 @@
  * @package WpRecaptchaForms
  */
 
-namespace WpRecaptchaForms\Tests\Unit;
+namespace WpRecaptchaForms\Tests\Unit\Privacy;
 
 use PHPUnit\Framework\TestCase;
 use WpRecaptchaForms\Consent\ConsentGate;

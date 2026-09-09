@@ -5,7 +5,7 @@
  * @package WpRecaptchaForms
  */
 
-namespace WpRecaptchaForms\Tests\Unit;
+namespace WpRecaptchaForms\Tests\Unit\Api;
 
 use PHPUnit\Framework\TestCase;
 use WpRecaptchaForms\Gate\ClientState;
