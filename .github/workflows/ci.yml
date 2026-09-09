@@ -1,0 +1,216 @@
+name: CI
+
+# Gate de qualidade contínuo. O `release.yml` repete a mesma suíte na hora da tag, mas
+# repetir na tag não é o mesmo que rodar a cada push: quando o gate só existe no release,
+# o custo de descobrir a quebra é uma release abortada em vez de um PR vermelho.
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+# Um PR com vários pushes seguidos cancela as execuções anteriores: só o último commit
+# importa, e minutos de runner não são de graça.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Testes na matriz de PHP declarada.
+  #
+  # O eixo de WordPress NÃO está aqui, e é decisão de escopo registrada em
+  # docs/compatibility-matrix.md §4 — a suíte unitária deste plugin foi desenhada para
+  # não carregar WordPress, então uma matriz de WP só faria sentido para os testes de
+  # integração, que rodam por WP-CLI.
+  # ---------------------------------------------------------------------------
+  test:
+    name: Testes (PHP ${{ matrix.php }})
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ["7.4", "8.1", "8.3"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+          tools: composer
+
+      # `--prefer-dist` e cache do Composer: a suíte roda em menos de um segundo, então
+      # sem cache o job é quase inteiramente download.
+      - name: Cache do Composer
+        uses: actions/cache@v4
+        with:
+          path: ~/.composer/cache
+          key: composer-${{ matrix.php }}-${{ hashFiles('composer.json') }}
+          restore-keys: composer-${{ matrix.php }}-
+
+      - name: Instalar dependências
+        run: composer install --no-progress --prefer-dist
+
+      - name: Suíte de testes
+        run: composer test
+
+      - name: Gate de fronteira (Provider/Transport isolados)
+        run: composer check:boundary
+
+      - name: Gate de i18n (pseudo-locale en_CA)
+        run: composer i18n:e2e
+
+  # ---------------------------------------------------------------------------
+  # Lint numa versão só: o WPCS não depende da versão de PHP do runner para decidir o
+  # que é violação — o piso alvo vem de `testVersion` no phpcs.xml.dist.
+  # ---------------------------------------------------------------------------
+  lint:
+    name: Padrão de código (WPCS)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.1"
+          coverage: none
+          tools: composer
+
+      - name: Instalar dependências
+        run: composer install --no-progress --prefer-dist
+
+      - name: PHPCS
+        run: composer lint
+
+  # ---------------------------------------------------------------------------
+  # Estado dos catálogos de tradução.
+  # ---------------------------------------------------------------------------
+  i18n:
+    name: Catálogos e progresso de tradução
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.1"
+          coverage: none
+
+      # A tabela dos READMEs é gerada; se alguém a editou à mão, ou traduziu sem
+      # recalcular, o PR fica vermelho aqui e não numa revisão humana.
+      - name: Tabela de progresso em dia
+        run: php bin/i18n-progress.php --check
+
+      - name: Idiomas mantidos completos
+        run: php bin/i18n-progress.php --check --require-complete=pt_BR,en_US,es_ES
+
+      # Regra assimétrica (Story 1.21 AC 9): idioma mantido entra com .po E .mo, e os dois
+      # têm de bater. Um .mo desatualizado no commit é um idioma que aparece 100% na tabela
+      # e não traduz nada no site.
+      - name: .po e .mo dos idiomas mantidos batem
+        run: |
+          set -euo pipefail
+          for locale in pt_BR en_US es_ES; do
+            po="languages/wp-recaptcha-forms-${locale}.po"
+            mo="languages/wp-recaptcha-forms-${locale}.mo"
+            [ -f "$mo" ] || { echo "::error::$mo ausente e $locale é idioma mantido."; exit 1; }
+            cp "$mo" "/tmp/${locale}.mo.commitado"
+            php bin/i18n-build.php "$po" > /dev/null
+            cmp -s "$mo" "/tmp/${locale}.mo.commitado" \
+              || { echo "::error::$mo não corresponde ao $po. Rode 'composer i18n:build'."; exit 1; }
+          done
+          echo "ok: os três catálogos mantidos estão consistentes."
+
+  # ---------------------------------------------------------------------------
+  # Higiene de PR: label de nível de versão e entrada no CHANGELOG.
+  # Só faz sentido em pull_request — num push direto para main não há PR a rotular.
+  # ---------------------------------------------------------------------------
+  pr-hygiene:
+    name: Label de versão e CHANGELOG
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # AC 2: sem label não passa, e não há default. Escolher o nível é juízo humano
+      # sobre raio de alcance; derivar de `feat:`/`fix:` seria fingir que a mensagem de
+      # commit sabe se a mudança quebra contrato público.
+      - name: Exigir label version:*
+        env:
+          LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
+        run: |
+          set -euo pipefail
+          echo "Labels: ${LABELS:-<nenhuma>}"
+
+          niveis=0
+          for nivel in major minor patch none; do
+            case ",${LABELS}," in
+              *",version:${nivel},"*) niveis=$((niveis + 1)); escolhido="$nivel" ;;
+            esac
+          done
+
+          if [ "$niveis" -eq 0 ]; then
+            echo "::error::PR sem label de nível. Aplique version:major, version:minor, version:patch ou version:none."
+            exit 1
+          fi
+
+          if [ "$niveis" -gt 1 ]; then
+            echo "::error::PR com mais de uma label de nível — o nível tem de ser único."
+            exit 1
+          fi
+
+          echo "Nível: version:${escolhido}"
+
+      # MAJOR exige justificativa escrita. É o único nível cuja consequência (quebra de
+      # contrato público, mudança de postura de segurança) não é reversível para quem já
+      # instalou.
+      - name: MAJOR exige justificativa
+        if: contains(github.event.pull_request.labels.*.name, 'version:major')
+        env:
+          CORPO: ${{ github.event.pull_request.body }}
+        run: |
+          set -euo pipefail
+          case "$CORPO" in
+            *MAJOR-JUSTIFICATIVA:*) echo "ok: justificativa presente." ;;
+            *) echo "::error::version:major exige uma linha 'MAJOR-JUSTIFICATIVA:' no corpo da PR."; exit 1 ;;
+          esac
+
+      # AC 4: PR que toca código precisa de entrada no CHANGELOG. PR que só mexe em
+      # documentação ou testes, não — a regra existe para o histórico do usuário, não
+      # para punir quem corrige um typo.
+      - name: CHANGELOG atualizado quando o código muda
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          alterados="$(git diff --name-only "$BASE" "$HEAD")"
+
+          toca_codigo="$(printf '%s\n' "$alterados" | grep -E '^(src/|assets/|bin/|wp-recaptcha-forms\.php|uninstall\.php)' || true)"
+
+          if [ -z "$toca_codigo" ]; then
+            echo "ok: nenhum arquivo de código alterado; CHANGELOG dispensado."
+            exit 0
+          fi
+
+          if printf '%s\n' "$alterados" | grep -qx 'CHANGELOG.md'; then
+            echo "ok: CHANGELOG.md atualizado."
+            exit 0
+          fi
+
+          echo "::error::Esta PR altera código e não tem entrada em CHANGELOG.md ([Unreleased])."
+          printf '%s\n' "$toca_codigo"
+          exit 1
