@@ -39,6 +39,28 @@ final class WpStubs {
 	/** @var array<string, array> Scripts registrados/enfileirados. */
 	public static $scripts = array();
 
+	/**
+	 * Capabilities do usuário corrente. `null` = tudo liberado (default histórico dos
+	 * stubs); array = só o que estiver com `true` passa.
+	 *
+	 * @var array<string,bool>|null
+	 */
+	public static $capabilities = null;
+
+	/**
+	 * Chamadas registradas da Settings API.
+	 *
+	 * @var array[]
+	 */
+	public static $settings_calls = array();
+
+	/**
+	 * Erros registrados via `add_settings_error()`.
+	 *
+	 * @var array[]
+	 */
+	public static $settings_errors = array();
+
 	public static function reset(): void {
 		self::$filters         = array();
 		self::$options         = array();
@@ -49,6 +71,9 @@ final class WpStubs {
 		self::$shortcodes      = array();
 		self::$privacy_content = array();
 		self::$scripts         = array();
+		self::$capabilities    = null;
+		self::$settings_calls  = array();
+		self::$settings_errors = array();
 
 		$_POST = array();
 
@@ -310,7 +335,11 @@ function is_admin() {
 }
 
 function current_user_can( $cap ) {
-	return true;
+	if ( null === WpStubs::$capabilities ) {
+		return true;
+	}
+
+	return ! empty( WpStubs::$capabilities[ $cap ] );
 }
 
 function is_wp_error( $thing ) {
@@ -376,4 +405,67 @@ class WP_User {
 	public $ID = 1;
 
 	public $user_login = 'admin';
+}
+
+/**
+ * Stubs da Settings API usados pela tela de config.
+ *
+ * A Settings API é quem carrega nonce e capability no save; nos testes ela só precisa
+ * não explodir e registrar o que foi chamado, para o teste poder afirmar sobre isso.
+ *
+ * @return void
+ */
+function settings_errors( $setting = '', $sanitize = false, $hide_on_update = false ) {
+	WpStubs::$settings_calls[] = array( 'settings_errors', $setting );
+}
+
+function settings_fields( $option_group ) {
+	WpStubs::$settings_calls[] = array( 'settings_fields', $option_group );
+
+	echo '<input type="hidden" name="option_page" value="' . esc_attr( (string) $option_group ) . '">';
+}
+
+function do_settings_sections( $page ) {
+	WpStubs::$settings_calls[] = array( 'do_settings_sections', $page );
+}
+
+function submit_button( $text = null, $type = 'primary', $name = 'submit', $wrap = true, $other = null ) {
+	echo '<button type="submit" class="button button-primary">' . esc_html( (string) ( $text ?? 'Salvar' ) ) . '</button>';
+}
+
+function add_settings_error( $setting, $code, $message, $type = 'error' ) {
+	WpStubs::$settings_errors[] = array(
+		'setting' => $setting,
+		'code'    => $code,
+		'message' => $message,
+		'type'    => $type,
+	);
+}
+
+/**
+ * Helpers de atributo do core. Devolvem string vazia ou o atributo, nunca escapam nada
+ * além do próprio nome do atributo — é literalmente o que o core faz.
+ *
+ * @return string
+ */
+function checked( $checked, $current = true, $display = true ) {
+	return __checked_selected_helper( $checked, $current, $display, 'checked' );
+}
+
+function selected( $selected, $current = true, $display = true ) {
+	return __checked_selected_helper( $selected, $current, $display, 'selected' );
+}
+
+function disabled( $disabled, $current = true, $display = true ) {
+	return __checked_selected_helper( $disabled, $current, $display, 'disabled' );
+}
+
+function __checked_selected_helper( $helper, $current, $display, $type ) {
+	$result = ( (string) $helper === (string) $current ) ? " $type='$type'" : '';
+
+	if ( $display ) {
+		echo $result; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	}
+
+	return $result;
 }
