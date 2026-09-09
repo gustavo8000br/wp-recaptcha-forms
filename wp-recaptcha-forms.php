@@ -73,6 +73,13 @@ function wp_recaptcha_forms_php_version_notice() {
 require_once WP_RECAPTCHA_FORMS_DIR . 'src/Autoloader.php';
 \WpRecaptchaForms\Autoloader::register();
 
+/*
+ * API pública. Carregada antes do kill switch de propósito: um tema que chame
+ * `wp_recaptcha_forms_render_field()` não pode virar fatal error só porque o operador
+ * desativou a proteção — as funções continuam existindo e devolvem o comportamento neutro.
+ */
+require_once WP_RECAPTCHA_FORMS_DIR . 'src/PublicApi.php';
+
 /**
  * Kill switch (arquitetura v1.1 §5, Story 1.1 AC7).
  *

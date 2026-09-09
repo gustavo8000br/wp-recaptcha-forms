@@ -17,10 +17,16 @@ define( 'WP_RECAPTCHA_FORMS_BUILD', 'v0.1.0-test-alpha' );
 define( 'WP_RECAPTCHA_FORMS_FILE', dirname( __DIR__ ) . '/wp-recaptcha-forms.php' );
 define( 'HOUR_IN_SECONDS', 3600 );
 
+define( 'ARRAY_A', 'ARRAY_A' );
+
 require_once __DIR__ . '/Support/wp-stubs.php';
+require_once __DIR__ . '/Support/woo-stubs.php';
 require_once dirname( __DIR__ ) . '/src/Autoloader.php';
 
 WpRecaptchaForms\Autoloader::register();
+
+// A API pública é um arquivo de funções: não é autocarregável, nem em produção nem aqui.
+require_once dirname( __DIR__ ) . '/src/PublicApi.php';
 
 spl_autoload_register(
 	static function ( $class_name ) {
