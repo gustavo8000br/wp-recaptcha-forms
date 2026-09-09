@@ -103,7 +103,7 @@ final class I18n {
 	 * @param string $locale Locale corrente.
 	 * @return string
 	 */
-	public static function filter_translation_file( $file, $domain, $locale ) {
+	public static function filter_translation_file( $file, $domain, $locale ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- assinatura fixada pelo filtro do WordPress; o locale já está embutido no nome do arquivo.
 		if ( self::DOMAIN !== $domain ) {
 			return $file;
 		}
