@@ -41,6 +41,9 @@ jobs:
       - name: Padrão de código (WPCS)
         run: composer lint
 
+      - name: Gate de i18n (pseudo-locale — nenhuma string visível escapou da tradução)
+        run: composer i18n:e2e
+
   build:
     needs: test
     runs-on: ubuntu-latest

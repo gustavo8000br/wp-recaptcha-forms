@@ -15,6 +15,12 @@ tests/
 bin/
 build/
 
+# Dependências de DEV instaladas pelo job de release pra rodar a suite (PHPUnit, WPCS,
+# nikic/php-parser) — ~22MB de peso morto em runtime, o plugin usa autoloader próprio
+# (src/Autoloader.php), nunca lê vendor/. Achado do @qa (docs/qa-release-review-v1.md,
+# B-01): sem esta linha o zip publicado carrega o PHPUnit inteiro pra produção.
+vendor/
+
 # `docs/` fica de fora, screenshots inclusive. Consequência aceita: as imagens do README
 # não resolvem dentro do zip. Elas existem para quem lê o README no GitHub, que é onde ele
 # é de fato lido — o WordPress não renderiza `README.md` de plugin (ele lê `readme.txt`).
