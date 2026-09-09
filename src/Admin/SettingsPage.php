@@ -59,6 +59,26 @@ final class SettingsPage {
 	public function boot(): void {
 		add_action( 'admin_menu', array( $this, 'register_menu' ) );
 		add_action( 'admin_init', array( $this, 'register_settings' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_styles' ) );
+	}
+
+	/**
+	 * CSS da tela, só na tela.
+	 *
+	 * @param string $hook Hook da tela corrente.
+	 * @return void
+	 */
+	public function enqueue_styles( $hook ): void {
+		if ( 'settings_page_' . self::SLUG !== $hook ) {
+			return;
+		}
+
+		wp_enqueue_style(
+			'wp-recaptcha-forms-admin',
+			WP_RECAPTCHA_FORMS_URL . 'assets/css/admin.css',
+			array(),
+			WP_RECAPTCHA_FORMS_VERSION
+		);
 	}
 
 	/**

@@ -1,0 +1,14 @@
+/* WP reCAPTCHA Forms — tela de configurações. */
+.wrf-settings .notice.inline {
+	margin: 1em 0;
+}
+
+.wrf-settings table.widefat {
+	margin-bottom: 1.5em;
+	max-width: 60em;
+}
+
+.wrf-settings table.widefat td,
+.wrf-settings table.widefat th {
+	vertical-align: middle;
+}

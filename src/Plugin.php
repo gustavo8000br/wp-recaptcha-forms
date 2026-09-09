@@ -88,6 +88,8 @@ final class Plugin {
 		do_action( 'wp_recaptcha_forms_register_integrations', $registry );
 
 		$registry->boot();
+
+		Frontend\AssetManager::instance()->boot();
 	}
 
 	/**
