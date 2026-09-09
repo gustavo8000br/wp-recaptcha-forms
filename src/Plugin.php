@@ -56,6 +56,38 @@ final class Plugin {
 	public function boot(): void {
 		add_action( 'init', array( $this, 'load_textdomain' ) );
 		add_action( 'plugins_loaded', array( Options::class, 'maybe_upgrade' ), 5 );
+
+		// Prioridade 20: depois do WooCommerce, para que o registry veja o que existe.
+		add_action( 'plugins_loaded', array( $this, 'boot_integrations' ), 20 );
+
+		Admin\SiteHealth::boot();
+
+		if ( is_admin() ) {
+			Admin\SettingsPage::instance()->boot();
+			Admin\Notices::boot();
+		}
+	}
+
+	/**
+	 * Registra as integrações disponíveis.
+	 *
+	 * O registry nasce vazio nesta rodada: as integrações concretas são das stories
+	 * seguintes. O ponto de registro existe desde já porque a tela de configurações é
+	 * gerada a partir dele.
+	 *
+	 * @return void
+	 */
+	public function boot_integrations(): void {
+		$registry = Integrations\Registry::instance();
+
+		/**
+		 * Permite registrar integrações antes do boot.
+		 *
+		 * @param Integrations\Registry $registry Registry.
+		 */
+		do_action( 'wp_recaptcha_forms_register_integrations', $registry );
+
+		$registry->boot();
 	}
 
 	/**
