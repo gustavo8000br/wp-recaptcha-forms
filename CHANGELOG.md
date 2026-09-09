@@ -30,11 +30,28 @@ Regra de bump (resumida — a íntegra está na Story 1.18):
   serviço externo (Stories 1.20 e 1.21).
 - `phpcs.xml.dist` com WPCS; `composer lint` e `composer lint:fix` funcionais (Story 1.25).
 - `docs/compatibility-matrix.md` com a matriz testada e as lacunas conhecidas (Story 1.24).
-- `README.md` (pt-BR) e `README-EN.md` completos (Stories 1.22 e 1.23).
+- `README.md` (pt-BR) e `README-EN.md` completos, em paridade, com screenshots reais da
+  tela de configurações (Stories 1.22 e 1.23).
+- `CONTRIBUTING.md`, incluindo a regra de paridade entre os dois READMEs (Story 1.23).
+- `src/I18n.php`: fallback de variantes regionais (`es_MX` → `es_ES` e mais dezenove),
+  cobrindo tanto `.mo` quanto `.l10n.php` do WP 6.5+ (Story 1.21).
+- `tests/Fixtures/siteverify/`: as respostas normativas do Google como dado, não como
+  código (Story 1.24).
 
 ### Corrigido
 
-- Strings visíveis que haviam escapado do pipeline de i18n passam a usar o text domain
-  `wp-recaptcha-forms` (Story 1.20).
+- `uninstall.php` declarava dez variáveis no escopo global sem prefixo, passíveis de
+  colisão com outro plugin no mesmo request de desinstalação. Agora é uma função prefixada,
+  sem variável global nenhuma (Story 1.25).
+- A tela de configurações concatenava o atributo `disabled` cru no HTML; passa a usar
+  `disabled()` do core (Story 1.25).
+- `render_forms_section()` recebia as opções por parâmetro e não as usava — uma segunda
+  fonte de verdade esperando divergir (Story 1.25).
+
+### Notas
+
+- A auditoria de i18n da Story 1.20 **não encontrou strings hardcoded**: as 102 strings
+  visíveis já estavam corretamente marcadas com o text domain `wp-recaptcha-forms`. O gate
+  de pseudo-locale entra como prevenção, não como correção.
 
 [Unreleased]: https://github.com/gustavo8000br/wp-recaptcha-forms/commits/main

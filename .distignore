@@ -12,14 +12,24 @@
 
 test-env/
 tests/
-docs/
 bin/
 build/
+
+# `docs/` fica de fora, screenshots inclusive. Consequência aceita: as imagens do README
+# não resolvem dentro do zip. Elas existem para quem lê o README no GitHub, que é onde ele
+# é de fato lido — o WordPress não renderiza `README.md` de plugin (ele lê `readme.txt`).
+# A alternativa seria embarcar 600 KB de PNG em toda instalação para uma página que o
+# painel nunca mostra.
+docs/
+
+CONTRIBUTING.md
 
 composer.json
 composer.lock
 phpunit.xml.dist
 phpunit.xml
+phpcs.xml.dist
+phpcs.xml
 
 # Código-fonte JS não minificado — só o build em assets/js/dist/ vai pro zip.
 assets/js/src/
