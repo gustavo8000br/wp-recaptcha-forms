@@ -24,17 +24,59 @@ final class WpStubs {
 	/** @var array<int, array{0:string,1:array}> */
 	public static $actions_fired = array();
 
+	/** @var array<string, mixed> Contexto de requisição controlável pelos testes. */
+	public static $env = array();
+
+	/** @var array<int, string> Tipo de cada post, por id. */
+	public static $post_types = array();
+
+	/** @var array<int, array{0:string,1:string}> Shortcodes registrados. */
+	public static $shortcodes = array();
+
+	/** @var array<int, array> Blocos entregues a wp_add_privacy_policy_content(). */
+	public static $privacy_content = array();
+
+	/** @var array<string, array> Scripts registrados/enfileirados. */
+	public static $scripts = array();
+
 	public static function reset(): void {
-		self::$filters       = array();
-		self::$options       = array();
-		self::$transients    = array();
-		self::$actions_fired = array();
+		self::$filters         = array();
+		self::$options         = array();
+		self::$transients      = array();
+		self::$actions_fired   = array();
+		self::$env             = array();
+		self::$post_types      = array();
+		self::$shortcodes      = array();
+		self::$privacy_content = array();
+		self::$scripts         = array();
+
+		$_POST = array();
 
 		if ( class_exists( '\WpRecaptchaForms\Options' ) ) {
 			\WpRecaptchaForms\Options::flush_cache();
 		}
+
+		if ( class_exists( '\WpRecaptchaForms\Runtime' ) ) {
+			\WpRecaptchaForms\Runtime::reset();
+		}
+
+		if ( class_exists( '\WpRecaptchaForms\Consent\ConsentGate' ) ) {
+			\WpRecaptchaForms\Consent\ConsentGate::set( null );
+		}
+	}
+
+	/** @param mixed $default */
+	public static function env( string $key, $default = false ) {
+		return array_key_exists( $key, self::$env ) ? self::$env[ $key ] : $default;
 	}
 }
+
+/**
+ * `wp_die()` interrompe a requisição. Nos testes ele vira exceção para que a asserção
+ * possa acontecer — o comportamento observável ("parou aqui, com esta mensagem") é o
+ * mesmo.
+ */
+final class WpDieException extends \Exception {}
 
 function add_filter( $hook, $callback, $priority = 10, $accepted_args = 1 ) {
 	WpStubs::$filters[ $hook ][ $priority ][] = $callback;
@@ -172,15 +214,95 @@ function determine_locale() {
 }
 
 function wp_doing_ajax() {
-	return false;
+	return (bool) WpStubs::env( 'doing_ajax', false );
 }
 
 function wp_doing_cron() {
-	return false;
+	return (bool) WpStubs::env( 'doing_cron', false );
 }
 
 function is_user_logged_in() {
-	return false;
+	return (bool) WpStubs::env( 'logged_in', false );
+}
+
+function get_post_type( $post = 0 ) {
+	return WpStubs::$post_types[ (int) $post ] ?? 'post';
+}
+
+function wp_die( $message = '', $title = '', $args = array() ) {
+	throw new WpDieException( is_string( $message ) ? $message : '' );
+}
+
+function wp_strip_all_tags( $text ) {
+	return trim( strip_tags( (string) $text ) );
+}
+
+function add_shortcode( $tag, $callback ) {
+	WpStubs::$shortcodes[ $tag ] = $callback;
+
+	return true;
+}
+
+function shortcode_atts( $pairs, $atts, $shortcode = '' ) {
+	$atts = (array) $atts;
+	$out  = array();
+
+	foreach ( $pairs as $name => $default ) {
+		$out[ $name ] = array_key_exists( $name, $atts ) ? $atts[ $name ] : $default;
+	}
+
+	return $out;
+}
+
+function wp_add_privacy_policy_content( $plugin_name, $policy_text ) {
+	WpStubs::$privacy_content[] = array( $plugin_name, $policy_text );
+}
+
+function wp_register_script( $handle, $src = '', $deps = array(), $ver = false, $args = false ) {
+	WpStubs::$scripts[ $handle ] = array(
+		'src'      => $src,
+		'deps'     => (array) $deps,
+		'enqueued' => WpStubs::$scripts[ $handle ]['enqueued'] ?? false,
+		'data'     => WpStubs::$scripts[ $handle ]['data'] ?? array(),
+	);
+
+	return true;
+}
+
+function wp_enqueue_script( $handle, $src = '', $deps = array(), $ver = false, $args = false ) {
+	if ( ! isset( WpStubs::$scripts[ $handle ] ) ) {
+		wp_register_script( $handle, $src, $deps, $ver, $args );
+	}
+
+	WpStubs::$scripts[ $handle ]['enqueued'] = true;
+
+	return true;
+}
+
+function wp_script_is( $handle, $status = 'enqueued' ) {
+	if ( ! isset( WpStubs::$scripts[ $handle ] ) ) {
+		return false;
+	}
+
+	return 'registered' === $status ? true : (bool) WpStubs::$scripts[ $handle ]['enqueued'];
+}
+
+function wp_localize_script( $handle, $object_name, $data ) {
+	if ( ! isset( WpStubs::$scripts[ $handle ] ) ) {
+		return false;
+	}
+
+	WpStubs::$scripts[ $handle ]['data'][ $object_name ] = $data;
+
+	return true;
+}
+
+function plugin_basename( $file ) {
+	return 'wp-recaptcha-forms/' . basename( (string) $file );
+}
+
+function __return_true() {
+	return true;
 }
 
 function is_admin() {
@@ -202,19 +324,56 @@ function wp_recaptcha_forms_is_killed() {
 
 class WP_Error {
 
-	private $code;
-	private $message;
+	private $errors = array();
 
-	public function __construct( $code = '', $message = '' ) {
-		$this->code    = $code;
-		$this->message = $message;
+	private $data = array();
+
+	public function __construct( $code = '', $message = '', $data = null ) {
+		if ( '' !== $code ) {
+			$this->add( $code, $message, $data );
+		}
+	}
+
+	public function add( $code, $message = '', $data = null ) {
+		$this->errors[ $code ][] = $message;
+
+		if ( null !== $data ) {
+			$this->data[ $code ] = $data;
+		}
+	}
+
+	public function has_errors() {
+		return ! empty( $this->errors );
+	}
+
+	public function get_error_codes() {
+		return array_keys( $this->errors );
 	}
 
 	public function get_error_code() {
-		return $this->code;
+		$codes = $this->get_error_codes();
+
+		return $codes ? $codes[0] : '';
 	}
 
-	public function get_error_message() {
-		return $this->message;
+	public function get_error_message( $code = '' ) {
+		$code = '' === $code ? $this->get_error_code() : $code;
+
+		return $this->errors[ $code ][0] ?? '';
 	}
+
+	public function get_error_data( $code = '' ) {
+		$code = '' === $code ? $this->get_error_code() : $code;
+
+		return $this->data[ $code ] ?? null;
+	}
+}
+
+class WC_Order {}
+
+class WP_User {
+
+	public $ID = 1;
+
+	public $user_login = 'admin';
 }

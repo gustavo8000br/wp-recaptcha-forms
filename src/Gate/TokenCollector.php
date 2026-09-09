@@ -77,6 +77,47 @@ final class TokenCollector {
 	}
 
 	/**
+	 * Monta um contexto a partir de valores que NÃO vieram do corpo de um POST de
+	 * formulário — hoje, a Store API do WooCommerce, que entrega token e cstate dentro do
+	 * JSON da requisição REST.
+	 *
+	 * Continua passando pelo coletor de propósito: `FormContext` é construído em um lugar
+	 * só, e a normalização do `cstate` (vocabulário fechado) não fica a critério do
+	 * adaptador.
+	 *
+	 * @param string $form_id      Identificador do formulário.
+	 * @param string $action       Action do v3.
+	 * @param mixed  $token        Token cru.
+	 * @param mixed  $client_state Estado do cliente cru.
+	 * @return FormContext
+	 */
+	public function from_values( string $form_id, string $action, $token, $client_state ): FormContext {
+		return new FormContext(
+			$form_id,
+			$action,
+			is_string( $token ) ? trim( $token ) : '',
+			ClientState::normalize( $client_state ),
+			$this->remote_ip()
+		);
+	}
+
+	/**
+	 * Um campo qualquer foi submetido nesta requisição?
+	 *
+	 * Existe porque o adaptador de login precisa saber se `wp-submit` veio no POST
+	 * (arquitetura v1.1 §6.3) e nenhum adaptador pode tocar em `$_POST` — regra
+	 * verificada por `bin/check-boundary.sh`. Devolve presença, nunca valor: quem
+	 * precisa de valor precisa de contexto, e contexto sai por `collect()`.
+	 *
+	 * @param string $field Nome do campo.
+	 * @return bool
+	 */
+	public static function submitted( string $field ): bool {
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- presença de campo, não valor; nonce em formulário público é o outro modo de falha do cache (v1 §13).
+		return isset( $_POST[ $field ] );
+	}
+
+	/**
 	 * IP do visitante.
 	 *
 	 * Sem tratamento de cabeçalho de proxy de propósito: `X-Forwarded-For` é forjável e
