@@ -32,6 +32,13 @@ final class WpStubs {
 	/** @var array<string, mixed> */
 	public static $transients = array();
 
+	/**
+	 * Eventos de cron agendados: hook => lista de `{timestamp, recurrence, args}`.
+	 *
+	 * @var array<string, array>
+	 */
+	public static $cron = array();
+
 	/** @var array<int, array{0:string,1:array}> */
 	public static $actions_fired = array();
 
@@ -85,6 +92,7 @@ final class WpStubs {
 		self::$autoload        = array();
 		self::$option_writes   = array();
 		self::$transients      = array();
+		self::$cron            = array();
 		self::$actions_fired   = array();
 		self::$env             = array();
 		self::$post_types      = array();
@@ -200,6 +208,64 @@ function delete_option( $name ) {
 	unset( WpStubs::$options[ $name ], WpStubs::$autoload[ $name ] );
 
 	return true;
+}
+
+function wp_schedule_event( $timestamp, $recurrence, $hook, $args = array() ) {
+	WpStubs::$cron[ $hook ][] = array(
+		'timestamp'  => (int) $timestamp,
+		'recurrence' => $recurrence,
+		'args'       => (array) $args,
+	);
+
+	return true;
+}
+
+function wp_schedule_single_event( $timestamp, $hook, $args = array() ) {
+	WpStubs::$cron[ $hook ][] = array(
+		'timestamp'  => (int) $timestamp,
+		'recurrence' => false,
+		'args'       => (array) $args,
+	);
+
+	return true;
+}
+
+function wp_next_scheduled( $hook, $args = array() ) {
+	if ( empty( WpStubs::$cron[ $hook ] ) ) {
+		return false;
+	}
+
+	return WpStubs::$cron[ $hook ][0]['timestamp'];
+}
+
+function wp_clear_scheduled_hook( $hook, $args = array() ) {
+	$count = isset( WpStubs::$cron[ $hook ] ) ? count( WpStubs::$cron[ $hook ] ) : 0;
+
+	unset( WpStubs::$cron[ $hook ] );
+
+	return $count;
+}
+
+function wp_generate_password( $length = 12, $special_chars = true, $extra_special_chars = false ) {
+	return substr( str_repeat( 'aA1!bB2@', (int) ceil( $length / 8 ) ), 0, (int) $length );
+}
+
+function wp_generate_uuid4() {
+	return sprintf(
+		'%04x%04x-%04x-4%03x-%04x-%04x%04x%04x',
+		wp_rand( 0, 0xffff ),
+		wp_rand( 0, 0xffff ),
+		wp_rand( 0, 0xffff ),
+		wp_rand( 0, 0x0fff ),
+		wp_rand( 0, 0x3fff ) | 0x8000,
+		wp_rand( 0, 0xffff ),
+		wp_rand( 0, 0xffff ),
+		wp_rand( 0, 0xffff )
+	);
+}
+
+function wp_rand( $min = 0, $max = 0 ) {
+	return random_int( (int) $min, 0 === (int) $max ? PHP_INT_MAX : (int) $max );
 }
 
 function get_transient( $name ) {

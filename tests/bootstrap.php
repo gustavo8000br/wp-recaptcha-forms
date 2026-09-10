@@ -16,6 +16,9 @@ define( 'WP_RECAPTCHA_FORMS_VERSION', '0.1.0' );
 define( 'WP_RECAPTCHA_FORMS_BUILD', 'v0.1.0-test-alpha' );
 define( 'WP_RECAPTCHA_FORMS_FILE', dirname( __DIR__ ) . '/wp-recaptcha-forms.php' );
 define( 'HOUR_IN_SECONDS', 3600 );
+define( 'MINUTE_IN_SECONDS', 60 );
+define( 'DAY_IN_SECONDS', 86400 );
+define( 'WEEK_IN_SECONDS', 604800 );
 
 define( 'ARRAY_A', 'ARRAY_A' );
 

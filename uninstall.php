@@ -19,6 +19,22 @@ if ( ! function_exists( 'wp_recaptcha_forms_uninstall_purge_current_site' ) ) {
 	 * famílias de prefixo existem porque o kill switch canônico usa `wrf_` e o resto usa
 	 * o prefixo longo.
 	 *
+	 * TELEMETRIA (telemetry-design §1.3, §5) — nomeada aqui de propósito, para que o
+	 * auditor que procura por "instance_id" no `uninstall.php` encontre a resposta em vez
+	 * do silêncio da varredura genérica. São três artefatos, todos sob o prefixo longo e
+	 * portanto todos cobertos pelo `LIKE` abaixo:
+	 *
+	 *   - `wp_recaptcha_forms_settings` — carrega `telemetry.instance_id` e o toggle;
+	 *   - `wp_recaptcha_forms_telemetry_counters` — os contadores agregados;
+	 *   - `_transient_wp_recaptcha_forms_telemetry_*` — o `envelope_id` guardado para a
+	 *     retentativa (escopo de transient, também varrido).
+	 *
+	 * Desinstalar apaga o identificador. Não é detalhe de limpeza: é a mesma propriedade
+	 * que o opt-out garante — a instalação some, e não pode ser recolada ao histórico.
+	 *
+	 * Qualquer artefato de telemetria futuro que NÃO caia sob um destes dois prefixos tem
+	 * de entrar numa lista explícita aqui. Hoje não existe nenhum.
+	 *
 	 * @return void
 	 */
 	function wp_recaptcha_forms_uninstall_purge_current_site() {
