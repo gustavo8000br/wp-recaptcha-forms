@@ -368,6 +368,18 @@ function determine_locale() {
 	return 'pt_BR';
 }
 
+function get_locale() {
+	return (string) WpStubs::env( 'locale', 'pt_BR' );
+}
+
+function is_multisite() {
+	return (bool) WpStubs::env( 'multisite', false );
+}
+
+function wp_get_environment_type() {
+	return (string) WpStubs::env( 'environment_type', 'production' );
+}
+
 function wp_doing_ajax() {
 	return (bool) WpStubs::env( 'doing_ajax', false );
 }

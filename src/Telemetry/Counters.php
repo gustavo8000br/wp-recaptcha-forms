@@ -264,11 +264,11 @@ final class Counters {
 			'total'       => 0,
 			'blocked'     => 0,
 			'by_class'    => array(
-				'allowed'                          => 0,
-				FailureClass::REJECTED             => 0,
-				FailureClass::INFRA                => 0,
-				FailureClass::MISCONFIG            => 0,
-				FailureClass::CLIENT_UNREACHABLE   => 0,
+				'allowed'                        => 0,
+				FailureClass::REJECTED           => 0,
+				FailureClass::INFRA              => 0,
+				FailureClass::MISCONFIG          => 0,
+				FailureClass::CLIENT_UNREACHABLE => 0,
 			),
 			'by_form'     => array(),
 		);

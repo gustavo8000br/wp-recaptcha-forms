@@ -84,11 +84,12 @@ final class Options {
 			),
 			// Estado por formulário. Populado pelo Registry (Story 1.11).
 			'forms'                             => array(),
+
 			/*
 			 * Telemetria (telemetry-design §4.1). OPT-IN, sempre.
 			 *
-			 * `enabled => false` é o default em instalação nova E em instalação que
-			 * atualiza. Mudar este default para `true` seria release MAJOR, pelo mesmo
+			 * O default de `enabled` é falso em instalação nova E em instalação que
+			 * atualiza. Mudar esse default para verdadeiro seria release MAJOR, pelo mesmo
 			 * raciocínio que torna MAJOR mudar o default de CLIENT_UNREACHABLE: é
 			 * mudança silenciosa de postura em instalação existente (§7).
 			 * Registro explícito: este projeto NÃO pretende fazê-lo.
@@ -99,7 +100,8 @@ final class Options {
 				'enabled'     => false,
 				'instance_id' => '',
 				'last_sent'   => 0,
-				'last_status' => '', // 'ok' | 'error' | 'pii_suspected' | ''.
+				// Diagnóstico local do último envio: ok, error, pii_suspected, ou vazio.
+				'last_status' => '',
 				'seq'         => 0,
 			),
 		);
