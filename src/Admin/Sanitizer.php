@@ -10,6 +10,7 @@ namespace WpRecaptchaForms\Admin;
 use WpRecaptchaForms\Gate\FailurePolicy;
 use WpRecaptchaForms\Integrations\Registry;
 use WpRecaptchaForms\Options;
+use WpRecaptchaForms\Telemetry\Consent;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -83,7 +84,45 @@ final class Sanitizer {
 
 		$clean['forms'] = self::forms( $input['forms'] ?? array(), $current['forms'] ?? array() );
 
+		/*
+		 * Telemetria: o toggle passa por `Telemetry\Consent`, NUNCA por escrita direta de
+		 * `telemetry.enabled` aqui. É o `Consent` que gera e apaga o `instance_id`, agenda
+		 * e desagenda o cron e apaga os contadores — um `$clean['telemetry']['enabled']`
+		 * cru deixaria a instalação "ligada" sem identificador e sem cron, ou "desligada"
+		 * com o identificador ainda no banco.
+		 *
+		 * O `Consent` escreve a option; logo abaixo relemos o resultado para dentro de
+		 * `$clean`, porque a Settings API vai gravar `$clean` por cima assim que este
+		 * callback retornar. Sem essa releitura, o save desfaria o que o `Consent` acabou
+		 * de fazer.
+		 */
+		self::apply_telemetry_consent( $input );
+
+		$clean['telemetry'] = Options::telemetry();
+
 		return $clean;
+	}
+
+	/**
+	 * Roteia o toggle de telemetria pelo ponto único de consentimento.
+	 *
+	 * @param array $input Entrada crua.
+	 * @return void
+	 */
+	private static function apply_telemetry_consent( array $input ): void {
+		// Sob constante de wp-config.php o checkbox é renderizado `disabled`, e um POST
+		// forjado não pode contornar isso.
+		if ( Options::telemetry_disabled_by_constant() ) {
+			return;
+		}
+
+		if ( empty( $input['telemetry']['enabled'] ) ) {
+			Consent::revoke();
+
+			return;
+		}
+
+		Consent::grant();
 	}
 
 	/**

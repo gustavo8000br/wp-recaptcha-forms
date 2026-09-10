@@ -64,6 +64,20 @@ final class Plugin {
 		Privacy\PrivacyShortcode::boot();
 
 		/*
+		 * O schedule customizado é registrado SEMPRE, mesmo sem telemetria ligada.
+		 *
+		 * Não é zelo: `wp_schedule_event()` recusa uma recorrência que não esteja em
+		 * `cron_schedules` NO MOMENTO da chamada. Registrando isto só sob
+		 * `telemetry_enabled()`, o primeiro opt-in — que acontece num request em que a
+		 * telemetria ainda estava desligada quando `boot()` rodou — falharia em silêncio,
+		 * e a instalação ficaria "ligada" sem nunca enviar nada. Bug encontrado no
+		 * WordPress real; a suíte com stubs não o pegava.
+		 *
+		 * Custo de um filtro que só acrescenta uma entrada num array: nenhum.
+		 */
+		add_filter( 'cron_schedules', array( Telemetry\Schedule::class, 'register' ) ); // phpcs:ignore WordPress.WP.CronInterval.ChangeDetected -- intervalo semanal, não sub-horário.
+
+		/*
 		 * Telemetria: só existe no request de quem optou (telemetry-design §3.3).
 		 * Sem opt-in, nem o listener de contagem nem o handler de envio são registrados —
 		 * a instalação que não optou não paga nada, nem uma leitura de option a mais.

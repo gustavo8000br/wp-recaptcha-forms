@@ -23,11 +23,11 @@ msgstr ""
 msgid "A proteção do WP reCAPTCHA Forms está desativada por constante"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:199
+#: src/Admin/SettingsPage.php:204
 msgid "A secret key foi recusada pelo Google e não foi salva. Confira se você copiou a secret key (não a site key) do mesmo projeto no console."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:206
+#: src/Admin/SettingsPage.php:211
 msgid "A secret key foi salva, mas não foi possível validá-la agora: o servidor não conseguiu falar com o Google. A validação acontece de novo na primeira verificação real."
 msgstr ""
 
@@ -40,7 +40,7 @@ msgstr ""
 msgid "Abrir as configurações"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:278
+#: src/Admin/SettingsPage.php:284
 msgid "Ainda não configurado — informe a site key e a secret key para começar a proteger os formulários."
 msgstr ""
 
@@ -52,7 +52,7 @@ msgstr ""
 msgid "As chaves do reCAPTCHA foram recusadas pelo Google. Os formulários continuam funcionando, mas sem verificação alguma."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:306
+#: src/Admin/SettingsPage.php:312
 msgid "As chaves do v2 e do v3 não são intercambiáveis. Ao trocar de versão, gere um par de chaves novo no console do Google para a versão escolhida."
 msgstr ""
 
@@ -60,7 +60,7 @@ msgstr ""
 msgid "As verificações estão funcionando."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:344
+#: src/Admin/SettingsPage.php:350
 msgid "Automático — respeita a WP Consent API, se houver"
 msgstr ""
 
@@ -68,19 +68,23 @@ msgstr ""
 msgid "Avaliações de produto"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:494
+#: src/Admin/SettingsPage.php:500
 msgid "Aviso exibido no próprio formulário"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:415
+#: src/Admin/SettingsPage.php:421
 msgid "Bloquear o envio"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:255
+#: src/Admin/SettingsPage.php:261
 msgid "Build: %s"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:299
+#: src/Admin/SettingsPage.php:615
+msgid "Cada visualização gera um identificador de envio novo, e o número de sequência mostrado é o do próximo envio. O restante é o estado real desta instalação."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:305
 msgid "Chaves e versão"
 msgstr ""
 
@@ -88,7 +92,7 @@ msgstr ""
 msgid "Checkout (clássico e Blocks)"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:389
+#: src/Admin/SettingsPage.php:395
 msgid "Com esta opção em \"permitir\", um visitante cujo navegador não consegue carregar o reCAPTCHA envia o formulário sem verificação. Isso preserva a venda de clientes com bloqueador de anúncios — e também deixa passar um robô que simule a mesma condição. Em \"bloquear\", nenhum envio não verificado passa, e visitantes com bloqueador não conseguem comprar, comentar nem se registrar."
 msgstr ""
 
@@ -100,11 +104,11 @@ msgstr ""
 msgid "Comentários"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:118
+#: src/Admin/SettingsPage.php:123
 msgid "Configurações"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:340
+#: src/Admin/SettingsPage.php:346
 msgid "Consentimento antes de carregar o script do Google"
 msgstr ""
 
@@ -120,39 +124,55 @@ msgstr ""
 msgid "Consentimento: não exigido — o script do Google carrega em toda página com formulário protegido."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:319
+#: src/Admin/SettingsPage.php:325
 msgid "Definida pela constante WP_RECAPTCHA_FORMS_SECRET_KEY em wp-config.php, que tem precedência sobre este campo."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:273
+#: src/Admin/SettingsPage.php:279
 msgid "Degradado — não verificando. As chaves foram recusadas pelo Google e os formulários estão passando sem verificação."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:322
+#: src/Admin/SettingsPage.php:328
 msgid "Deixe em branco para manter a secret atual. Ao salvar uma secret nova, ela é validada com o Google — o que prova que a secret está correta, mas não prova que a site key é do mesmo projeto."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:498
+#: src/Admin/SettingsPage.php:504
 msgid "Deixe em branco para usar o texto padrão, já traduzido."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:268
+#: src/Admin/SettingsPage.php:540
+msgid "Desativado por constante em wp-config.php."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:274
 msgid "Desativado — a constante WRF_DISABLE está definida em wp-config.php e nenhum formulário está sendo verificado."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:335
+#: src/Admin/SettingsPage.php:547
+msgid "Desligar apaga o identificador desta instalação. Ao religar, ela passa a ser uma instalação nova, sem ligação com o histórico anterior."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:543
+msgid "Envia, uma vez por semana: versões de PHP, WordPress e do plugin, quais formulários você protegeu, sua configuração, e a proporção entre envios aprovados e bloqueados."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:537
+msgid "Enviar estatísticas de uso anônimas para o autor do plugin"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:341
 msgid "Enviar o endereço IP do visitante ao Google junto com a verificação"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:491
+#: src/Admin/SettingsPage.php:497
 msgid "Envio reprovado pelo Google"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:330
+#: src/Admin/SettingsPage.php:336
 msgid "Envios com score abaixo deste valor são bloqueados. 0.6 é um ponto de partida conservador. Só vale para o v3."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:395
+#: src/Admin/SettingsPage.php:401
 msgid "Envios que o Google verificou e reprovou são sempre bloqueados — isso não é configurável, porque torná-lo configurável desligaria o plugin por padrão."
 msgstr ""
 
@@ -162,6 +182,10 @@ msgstr ""
 
 #: src/Integrations/WooCommerce/CheckoutIntegration.php:136
 msgid "Estado declarado pelo navegador quando a verificação não pôde ser obtida."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:532
+msgid "Estatísticas de uso"
 msgstr ""
 
 #: src/Frontend/Messages.php:133
@@ -176,23 +200,23 @@ msgstr ""
 msgid "Este texto é um ponto de partida para a sua política de privacidade. Ele não é aconselhamento jurídico e não torna a instalação conforme à LGPD ou ao GDPR."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:345
+#: src/Admin/SettingsPage.php:351
 msgid "Exigir — não carrega sem consentimento explícito"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:444
+#: src/Admin/SettingsPage.php:450
 msgid "Formulário"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:431
+#: src/Admin/SettingsPage.php:437
 msgid "Formulários protegidos"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:364
+#: src/Admin/SettingsPage.php:370
 msgid "Google Cloud / reCAPTCHA Enterprise"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:411
+#: src/Admin/SettingsPage.php:417
 msgid "Herdar do global"
 msgstr ""
 
@@ -212,19 +236,19 @@ msgstr ""
 msgid "Login"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:336
+#: src/Admin/SettingsPage.php:342
 msgid "Melhora a qualidade do score. Desligar não impede que o Google receba o IP: o script do reCAPTCHA é carregado do domínio do Google pelo navegador do visitante."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:497
+#: src/Admin/SettingsPage.php:503
 msgid "Mensagens"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:434
+#: src/Admin/SettingsPage.php:440
 msgid "Nenhuma integração de formulário está registrada nesta instalação."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:522
+#: src/Admin/SettingsPage.php:631
 msgid "Newsletter"
 msgstr ""
 
@@ -232,7 +256,11 @@ msgstr ""
 msgid "Não conseguimos verificar sua sessão porque a verificação de segurança não carregou no seu navegador. Desative o bloqueador de anúncios (ou aceite os cookies) para esta página e tente novamente."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:343
+#: src/Admin/SettingsPage.php:545
+msgid "Não envia: o endereço do seu site, e-mails, endereços IP, conteúdo de formulários, suas chaves do reCAPTCHA, nem qualquer dado dos seus visitantes ou clientes."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:349
 msgid "Não exigir — carrega sempre"
 msgstr ""
 
@@ -260,12 +288,16 @@ msgstr ""
 msgid "O checkout em Blocks requer WooCommerce %s ou superior. O checkout clássico continua protegido."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:493
+#: src/Admin/SettingsPage.php:499
 msgid "O navegador do visitante não carregou o reCAPTCHA"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:354
+#: src/Admin/SettingsPage.php:360
 msgid "O plugin não se integra a nenhuma plataforma de consentimento pelo nome: ele publica um contrato (um filtro no PHP e uma função no JavaScript) que qualquer uma pode chamar. O README traz os trechos prontos."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:614
+msgid "O que seria enviado agora"
 msgstr ""
 
 #: src/Privacy/PrivacyNotice.php:65
@@ -280,7 +312,7 @@ msgstr ""
 msgid "O servidor deste site não envia o endereço IP do visitante ao Google junto com a verificação. Desligar esse envio não impede que o Google receba o endereço IP, porque o script do reCAPTCHA é carregado diretamente do domínio do Google pelo navegador do visitante."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:361
+#: src/Admin/SettingsPage.php:367
 msgid "Onde obter as chaves:"
 msgstr ""
 
@@ -288,19 +320,23 @@ msgstr ""
 msgid "Os formulários estão sendo enviados SEM verificação até que isso seja corrigido."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:414
+#: src/Admin/SettingsPage.php:420
 msgid "Permitir o envio"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:334
+#: src/Admin/SettingsPage.php:555
+msgid "Política de privacidade da telemetria"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:340
 msgid "Privacidade"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:283
+#: src/Admin/SettingsPage.php:289
 msgid "Protegendo — as verificações estão funcionando."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:445
+#: src/Admin/SettingsPage.php:451
 msgid "Proteger"
 msgstr ""
 
@@ -309,7 +345,7 @@ msgstr ""
 msgid "Proteção do WP reCAPTCHA Forms"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:379
+#: src/Admin/SettingsPage.php:385
 msgid "Quando a verificação não for possível"
 msgstr ""
 
@@ -325,27 +361,27 @@ msgstr ""
 msgid "Registro de usuário"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:386
+#: src/Admin/SettingsPage.php:392
 msgid "Se o navegador do visitante não conseguir carregar o reCAPTCHA (bloqueador de anúncios, cookies recusados)"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:447
+#: src/Admin/SettingsPage.php:453
 msgid "Se o navegador não carregar o reCAPTCHA"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:382
+#: src/Admin/SettingsPage.php:388
 msgid "Se o nosso servidor não conseguir falar com o Google"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:446
+#: src/Admin/SettingsPage.php:452
 msgid "Se o servidor não alcançar o Google"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:315
+#: src/Admin/SettingsPage.php:321
 msgid "Secret key"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:216
+#: src/Admin/SettingsPage.php:221
 msgid "Secret key validada com o Google. (Esta checagem não prova que a site key pertence ao mesmo projeto — isso só aparece em uma verificação real.)"
 msgstr ""
 
@@ -354,11 +390,15 @@ msgstr ""
 msgid "Segurança"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:310
+#: src/Admin/SettingsPage.php:316
 msgid "Site key"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:328
+#: src/Admin/SettingsPage.php:530
+msgid "Telemetria (opcional)"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:334
 msgid "Threshold de score (v3)"
 msgstr ""
 
@@ -366,15 +406,19 @@ msgstr ""
 msgid "Token de verificação obtido no navegador."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:492
+#: src/Admin/SettingsPage.php:554
+msgid "Ver exatamente o que será enviado"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:498
 msgid "Verificação indisponível para o servidor"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:303
+#: src/Admin/SettingsPage.php:309
 msgid "Versão do reCAPTCHA"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:232
+#: src/Admin/SettingsPage.php:237
 msgid "Você não tem permissão para acessar esta página."
 msgstr ""
 
@@ -382,9 +426,9 @@ msgstr ""
 msgid "WP Consent API detectada"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:152
-#: src/Admin/SettingsPage.php:153
-#: src/Admin/SettingsPage.php:238
+#: src/Admin/SettingsPage.php:157
+#: src/Admin/SettingsPage.php:158
+#: src/Admin/SettingsPage.php:243
 #: src/Privacy/PrivacyShortcode.php:59
 msgid "WP reCAPTCHA Forms"
 msgstr ""
@@ -401,19 +445,19 @@ msgstr ""
 msgid "WP reCAPTCHA Forms: todas as verificações recentes falharam. A causa mais provável é a site key e a secret key pertencerem a projetos diferentes no console do Google. Confira as duas chaves."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:519
+#: src/Admin/SettingsPage.php:628
 msgid "WooCommerce"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:525
+#: src/Admin/SettingsPage.php:634
 msgid "WordPress"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:321
+#: src/Admin/SettingsPage.php:327
 msgid "ainda não configurada"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:362
+#: src/Admin/SettingsPage.php:368
 msgid "console clássico do reCAPTCHA (recomendado)"
 msgstr ""
 
@@ -421,10 +465,14 @@ msgstr ""
 msgid "nenhum provedor detectado"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:305
+#: src/Admin/SettingsPage.php:311
 msgid "v2 (caixa \"Não sou um robô\")"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:304
+#: src/Admin/SettingsPage.php:310
 msgid "v3 (invisível, por score) — recomendado"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:562
+msgid "Último envio: não concluído. Isso não afeta a proteção dos seus formulários."
 msgstr ""

@@ -655,6 +655,32 @@ function __checked_selected_helper( $helper, $current, $display, $type ) {
  * @param string $path Caminho relativo.
  * @return string
  */
+function wp_create_nonce( $action = -1 ) {
+	return 'nonce-' . md5( (string) $action );
+}
+
+function wp_verify_nonce( $nonce, $action = -1 ) {
+	return wp_create_nonce( $action ) === $nonce ? 1 : false;
+}
+
+function add_query_arg( ...$args ) {
+	if ( is_array( $args[0] ) ) {
+		$pairs = $args[0];
+		$url   = $args[1] ?? '';
+	} else {
+		$pairs = array( $args[0] => $args[1] );
+		$url   = $args[2] ?? '';
+	}
+
+	$separator = false === strpos( (string) $url, '?' ) ? '?' : '&';
+
+	return $url . $separator . http_build_query( $pairs );
+}
+
+function wp_nonce_url( $url, $action = -1, $name = '_wpnonce' ) {
+	return add_query_arg( $name, wp_create_nonce( $action ), $url );
+}
+
 function admin_url( $path = '' ) {
 	return 'https://example.test/wp-admin/' . ltrim( (string) $path, '/' );
 }

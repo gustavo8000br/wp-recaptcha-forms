@@ -353,6 +353,10 @@ final class TelemetryTransportTest extends TestCase {
 	 * @return void
 	 */
 	public function test_weekly_schedule_is_registered(): void {
+		// Quem registra a recorrência é o `Plugin`, incondicionalmente — ver a regressão
+		// documentada em `test_schedule_is_registered_before_the_first_opt_in()`.
+		( new \WpRecaptchaForms\Plugin() )->boot();
+
 		$schedules = apply_filters( 'cron_schedules', array() );
 
 		$this->assertArrayHasKey( Schedule::RECURRENCE, $schedules );
@@ -378,5 +382,63 @@ final class TelemetryTransportTest extends TestCase {
 		Transport::run();
 
 		$this->assertSame( 'https://exemplo.test/ingest', WpStubs::$http[0]['url'] );
+	}
+
+	/**
+	 * Regressão: o schedule customizado tem de existir ANTES do primeiro opt-in.
+	 *
+	 * `wp_schedule_event()` recusa uma recorrência ausente de `cron_schedules` no momento
+	 * da chamada. Enquanto o filtro era registrado só sob `telemetry_enabled()`, o
+	 * primeiro opt-in — que roda num request em que a telemetria ainda estava desligada
+	 * quando o plugin bootou — falhava em SILÊNCIO: a tela mostrava "ligada" e nada nunca
+	 * era enviado. Encontrado no WordPress real; os stubs não pegavam, porque o stub de
+	 * `wp_schedule_event()` aceita qualquer recorrência.
+	 *
+	 * @return void
+	 */
+	public function test_schedule_is_registered_before_the_first_opt_in(): void {
+		WpStubs::reset();
+		Counters::reset_runtime();
+
+		// Estado de instalação nova: telemetria desligada quando o plugin boota.
+		$this->assertFalse( Options::telemetry_enabled() );
+
+		( new \WpRecaptchaForms\Plugin() )->boot();
+
+		$this->assertArrayHasKey(
+			Schedule::RECURRENCE,
+			apply_filters( 'cron_schedules', array() ),
+			'a recorrência precisa existir mesmo com a telemetria desligada'
+		);
+	}
+
+	/**
+	 * O `boot()` do transporte recupera um agendamento perdido — desativação/reativação
+	 * do plugin, `wp cron event delete`, ou um opt-in anterior à correção acima.
+	 *
+	 * @return void
+	 */
+	public function test_boot_heals_a_lost_schedule(): void {
+		wp_clear_scheduled_hook( Schedule::HOOK );
+
+		$this->assertFalse( wp_next_scheduled( Schedule::HOOK ) );
+
+		Transport::boot();
+
+		$this->assertNotFalse( wp_next_scheduled( Schedule::HOOK ) );
+	}
+
+	/**
+	 * E não duplica o evento quando ele já existe.
+	 *
+	 * @return void
+	 */
+	public function test_boot_does_not_duplicate_an_existing_schedule(): void {
+		wp_clear_scheduled_hook( Schedule::HOOK );
+
+		Transport::boot();
+		Transport::boot();
+
+		$this->assertCount( 1, WpStubs::$cron[ Schedule::HOOK ] );
 	}
 }

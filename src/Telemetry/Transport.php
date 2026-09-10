@@ -39,12 +39,23 @@ final class Transport {
 	 * Chamado só quando a telemetria está ligada. Note que NENHUM hook de submissão
 	 * aparece aqui — é o que torna a regra 1 verificável em vez de prometida.
 	 *
+	 * O schedule customizado em si é registrado pelo `Plugin`, incondicionalmente: ele
+	 * precisa existir ANTES do primeiro opt-in, senão `wp_schedule_event()` recusa a
+	 * recorrência e a instalação fica ligada sem nunca enviar.
+	 *
 	 * @return void
 	 */
 	public static function boot(): void {
-		add_filter( 'cron_schedules', array( Schedule::class, 'register' ) ); // phpcs:ignore WordPress.WP.CronInterval.ChangeDetected -- intervalo semanal, não sub-horário.
 		add_action( Schedule::HOOK, array( __CLASS__, 'run' ) );
 		add_action( Schedule::HOOK_RETRY, array( __CLASS__, 'run_retry' ) );
+
+		/*
+		 * Cura de agendamento perdido. O evento pode sumir por desativação/reativação do
+		 * plugin, por um `wp cron event delete`, ou por um opt-in que aconteceu antes
+		 * desta correção. Sem isto, a telemetria fica ligada na tela e muda para sempre.
+		 * `activate()` é no-op quando já existe evento.
+		 */
+		Schedule::activate();
 	}
 
 	/**

@@ -12,6 +12,8 @@ use WpRecaptchaForms\Gate\FailurePolicy;
 use WpRecaptchaForms\Integrations\Registry;
 use WpRecaptchaForms\Options;
 use WpRecaptchaForms\Plugin;
+use WpRecaptchaForms\Telemetry\Endpoints;
+use WpRecaptchaForms\Telemetry\Envelope;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -31,6 +33,9 @@ final class SettingsPage {
 
 	/** Grupo de opções da Settings API. */
 	const GROUP = 'wp_recaptcha_forms_group';
+
+	/** Ação da pré-visualização do envelope de telemetria. */
+	const PREVIEW_ACTION = 'wp_recaptcha_forms_telemetry_preview';
 
 	/**
 	 * Instância única.
@@ -248,6 +253,7 @@ final class SettingsPage {
 		$this->render_failure_section( $options );
 		$this->render_forms_section();
 		$this->render_messages_section( $options );
+		$this->render_telemetry_section( $options );
 
 		submit_button();
 		echo '</form>';
@@ -505,6 +511,109 @@ final class SettingsPage {
 		}
 
 		echo '</tbody></table>';
+	}
+
+	/**
+	 * Seção de telemetria (telemetry-design §4.2).
+	 *
+	 * **Por último na página, e é o lugar certo:** ela não afeta o funcionamento do
+	 * plugin. Tudo que decide se um formulário passa ou não passa fica acima.
+	 *
+	 * @param array $options Opções.
+	 * @return void
+	 */
+	private function render_telemetry_section( array $options ): void {
+		$name      = Options::OPTION;
+		$telemetry = is_array( $options['telemetry'] ?? null ) ? $options['telemetry'] : array();
+		$by_const  = Options::telemetry_disabled_by_constant();
+
+		echo '<h2>' . esc_html__( 'Telemetria (opcional)', 'wp-recaptcha-forms' ) . '</h2>';
+		echo '<table class="form-table" role="presentation"><tbody>';
+		echo '<tr><th scope="row">' . esc_html__( 'Estatísticas de uso', 'wp-recaptcha-forms' ) . '</th><td>';
+
+		echo '<label><input type="checkbox" name="' . esc_attr( $name ) . '[telemetry][enabled]" value="1" '
+			. checked( true, ! empty( $telemetry['enabled'] ), false )
+			. disabled( $by_const, true, false )
+			. '> ' . esc_html__( 'Enviar estatísticas de uso anônimas para o autor do plugin', 'wp-recaptcha-forms' ) . '</label>';
+
+		if ( $by_const ) {
+			echo '<p class="description">' . esc_html__( 'Desativado por constante em wp-config.php.', 'wp-recaptcha-forms' ) . '</p>';
+		}
+
+		echo '<p class="description">' . esc_html__( 'Envia, uma vez por semana: versões de PHP, WordPress e do plugin, quais formulários você protegeu, sua configuração, e a proporção entre envios aprovados e bloqueados.', 'wp-recaptcha-forms' ) . '</p>';
+
+		echo '<p class="description">' . esc_html__( 'Não envia: o endereço do seu site, e-mails, endereços IP, conteúdo de formulários, suas chaves do reCAPTCHA, nem qualquer dado dos seus visitantes ou clientes.', 'wp-recaptcha-forms' ) . '</p>';
+
+		echo '<p class="description">' . esc_html__( 'Desligar apaga o identificador desta instalação. Ao religar, ela passa a ser uma instalação nova, sem ligação com o histórico anterior.', 'wp-recaptcha-forms' ) . '</p>';
+
+		/*
+		 * O botão fica disponível com o toggle DESLIGADO — nunca `disabled()`. Ninguém
+		 * decide sobre um dado que só pode ver depois de aceitar enviá-lo.
+		 */
+		echo '<p>';
+		echo '<a class="button" href="' . esc_url( $this->preview_url() ) . '">' . esc_html__( 'Ver exatamente o que será enviado', 'wp-recaptcha-forms' ) . '</a>';
+		echo ' <a href="' . esc_url( Endpoints::privacy() ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Política de privacidade da telemetria', 'wp-recaptcha-forms' ) . '</a>';
+		echo '</p>';
+
+		// Diagnóstico local, discreto e dentro da seção. NUNCA um notice (§6.3).
+		$status = (string) ( $telemetry['last_status'] ?? '' );
+
+		if ( 'error' === $status || 'pii_suspected' === $status ) {
+			echo '<p class="description">' . esc_html__( 'Último envio: não concluído. Isso não afeta a proteção dos seus formulários.', 'wp-recaptcha-forms' ) . '</p>';
+		}
+
+		echo '</td></tr>';
+		echo '</tbody></table>';
+
+		$this->render_telemetry_preview();
+	}
+
+	/**
+	 * URL da pré-visualização, com nonce.
+	 *
+	 * @return string
+	 */
+	private function preview_url(): string {
+		return wp_nonce_url(
+			admin_url( 'options-general.php?page=' . self::SLUG . '&wrf_preview=1' ),
+			self::PREVIEW_ACTION
+		);
+	}
+
+	/**
+	 * O `<pre>` com o JSON real, quando pedido.
+	 *
+	 * O JSON sai do MESMO código do envio (`Envelope::build()`), nunca de um exemplo
+	 * escrito à mão — que envelheceria e passaria a mentir. É o item que mais importa da
+	 * tela: a auditoria de um cético leva trinta segundos em vez de exigir um `tcpdump`.
+	 *
+	 * `Envelope::build()` é puro, então isto não incrementa `seq` nem grava `last_sent`,
+	 * mesmo com a telemetria desligada.
+	 *
+	 * @return void
+	 */
+	private function render_telemetry_preview(): void {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- o nonce é verificado na linha seguinte; esta leitura só decide se há o que verificar.
+		if ( empty( $_GET['wrf_preview'] ) ) {
+			return;
+		}
+
+		// Ação de admin sob capability + nonce, como toda a tela (Story 1.25).
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+
+		$nonce = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
+
+		if ( ! wp_verify_nonce( $nonce, self::PREVIEW_ACTION ) ) {
+			return;
+		}
+
+		$envelope = Envelope::build();
+
+		echo '<h3>' . esc_html__( 'O que seria enviado agora', 'wp-recaptcha-forms' ) . '</h3>';
+		echo '<p class="description">' . esc_html__( 'Cada visualização gera um identificador de envio novo, e o número de sequência mostrado é o do próximo envio. O restante é o estado real desta instalação.', 'wp-recaptcha-forms' ) . '</p>';
+		echo '<pre class="wrf-telemetry-preview">' . esc_html( (string) wp_json_encode( $envelope, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) ) . '</pre>';
 	}
 
 	/**

@@ -320,3 +320,50 @@ msgstr "v3 (invisible, por puntuación) — recomendado"
 
 msgid "Este site envia semanalmente ao autor do plugin estatísticas agregadas de uso, sem endereço do site, sem dados de visitantes e sem conteúdo de formulários."
 msgstr "Este sitio envía semanalmente al autor del plugin estadísticas agregadas de uso, sin la dirección del sitio, sin datos de visitantes y sin contenido de formularios."
+
+msgid "Cada visualização gera um identificador de envio novo, e o número de sequência mostrado é o do próximo envio. O restante é o estado real desta instalação."
+msgstr "Cada visualización genera un identificador de envío nuevo, y el número de secuencia mostrado es el del próximo envío. El resto es el estado real de esta instalación."
+
+
+msgid "Desativado por constante em wp-config.php."
+msgstr "Desactivado por una constante en wp-config.php."
+
+
+msgid "Desligar apaga o identificador desta instalação. Ao religar, ela passa a ser uma instalação nova, sem ligação com o histórico anterior."
+msgstr "Desactivarlo borra el identificador de esta instalación. Al volver a activarlo, pasa a ser una instalación nueva, sin vínculo con el historial anterior."
+
+
+msgid "Envia, uma vez por semana: versões de PHP, WordPress e do plugin, quais formulários você protegeu, sua configuração, e a proporção entre envios aprovados e bloqueados."
+msgstr "Envía, una vez por semana: versiones de PHP, WordPress y del plugin, qué formularios has protegido, tu configuración, y la proporción entre envíos aprobados y bloqueados."
+
+
+msgid "Enviar estatísticas de uso anônimas para o autor do plugin"
+msgstr "Enviar estadísticas de uso anónimas al autor del plugin"
+
+
+msgid "Estatísticas de uso"
+msgstr "Estadísticas de uso"
+
+
+msgid "Não envia: o endereço do seu site, e-mails, endereços IP, conteúdo de formulários, suas chaves do reCAPTCHA, nem qualquer dado dos seus visitantes ou clientes."
+msgstr "No envía: la dirección de tu sitio, correos electrónicos, direcciones IP, contenido de formularios, tus claves de reCAPTCHA, ni ningún dato de tus visitantes o clientes."
+
+
+msgid "O que seria enviado agora"
+msgstr "Lo que se enviaría ahora"
+
+
+msgid "Política de privacidade da telemetria"
+msgstr "Política de privacidad de la telemetría"
+
+
+msgid "Telemetria (opcional)"
+msgstr "Telemetría (opcional)"
+
+
+msgid "Ver exatamente o que será enviado"
+msgstr "Ver exactamente lo que se enviará"
+
+
+msgid "Último envio: não concluído. Isso não afeta a proteção dos seus formulários."
+msgstr "Último envío: no completado. Esto no afecta a la protección de tus formularios."
