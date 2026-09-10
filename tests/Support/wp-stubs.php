@@ -18,6 +18,17 @@ final class WpStubs {
 	/** @var array<string, mixed> */
 	public static $options = array();
 
+	/** @var array<string, string> Valor de `autoload` com que cada option foi gravada. */
+	public static $autoload = array();
+
+	/**
+	 * Quantas escritas cada option recebeu. Permite afirmar sobre AMPLIFICAÇÃO de
+	 * escrita, que é o custo que a telemetria impõe ao site do operador (§3.3).
+	 *
+	 * @var array<string, int>
+	 */
+	public static $option_writes = array();
+
 	/** @var array<string, mixed> */
 	public static $transients = array();
 
@@ -71,6 +82,8 @@ final class WpStubs {
 	public static function reset(): void {
 		self::$filters         = array();
 		self::$options         = array();
+		self::$autoload        = array();
+		self::$option_writes   = array();
 		self::$transients      = array();
 		self::$actions_fired   = array();
 		self::$env             = array();
@@ -87,6 +100,10 @@ final class WpStubs {
 
 		if ( class_exists( '\WpRecaptchaForms\Options' ) ) {
 			\WpRecaptchaForms\Options::flush_cache();
+		}
+
+		if ( class_exists( '\WpRecaptchaForms\Telemetry\Counters' ) ) {
+			\WpRecaptchaForms\Telemetry\Counters::reset_runtime();
 		}
 
 		if ( class_exists( '\WpRecaptchaForms\Runtime' ) ) {
@@ -158,22 +175,29 @@ function get_option( $name, $default = false ) {
 	return array_key_exists( $name, WpStubs::$options ) ? WpStubs::$options[ $name ] : $default;
 }
 
-function update_option( $name, $value ) {
-	WpStubs::$options[ $name ] = $value;
+function update_option( $name, $value, $autoload = null ) {
+	WpStubs::$options[ $name ]       = $value;
+	WpStubs::$option_writes[ $name ] = ( WpStubs::$option_writes[ $name ] ?? 0 ) + 1;
+
+	if ( null !== $autoload ) {
+		WpStubs::$autoload[ $name ] = $autoload;
+	}
 
 	return true;
 }
 
-function add_option( $name, $value ) {
+function add_option( $name, $value, $deprecated = '', $autoload = 'yes' ) {
 	if ( array_key_exists( $name, WpStubs::$options ) ) {
 		return false;
 	}
+
+	WpStubs::$autoload[ $name ] = $autoload;
 
 	return update_option( $name, $value );
 }
 
 function delete_option( $name ) {
-	unset( WpStubs::$options[ $name ] );
+	unset( WpStubs::$options[ $name ], WpStubs::$autoload[ $name ] );
 
 	return true;
 }

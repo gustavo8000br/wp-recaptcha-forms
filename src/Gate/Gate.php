@@ -85,18 +85,18 @@ final class Gate {
 
 		// 3. Secret ausente: erro do operador, e sem gastar rede.
 		if ( '' === Options::secret_key() ) {
-			return $this->remember( $key, $this->decide( FailureClass::MISCONFIG, $context, null, array( 'secret:missing' ) ) );
+			return $this->remember( $key, $this->decide( FailureClass::MISCONFIG, $context, null, array( 'secret:missing' ) ), $context );
 		}
 
 		// 4. Token vazio: decide sem gastar rede.
 		if ( '' === $context->token() ) {
 			if ( ClientState::is_unreachable( $context->client_state() ) ) {
 				// 4a. O cliente declarou que não alcançou o provedor.
-				return $this->remember( $key, $this->decide( FailureClass::CLIENT_UNREACHABLE, $context, $context->client_state() ) );
+				return $this->remember( $key, $this->decide( FailureClass::CLIENT_UNREACHABLE, $context, $context->client_state() ), $context );
 			}
 
 			// 4b. Nada de token e nenhuma declaração: é o que um bot produz.
-			return $this->remember( $key, $this->decide( FailureClass::REJECTED, $context, RejectionReason::MISSING_TOKEN ) );
+			return $this->remember( $key, $this->decide( FailureClass::REJECTED, $context, RejectionReason::MISSING_TOKEN ), $context );
 		}
 
 		// 5-6. Chama o provider e classifica.
@@ -111,7 +111,7 @@ final class Gate {
 				self::clear_misconfig();
 			}
 
-			return $this->remember( $key, Verdict::allow() );
+			return $this->remember( $key, Verdict::allow(), $context );
 		}
 
 		$failure = $response->failure();
@@ -121,7 +121,7 @@ final class Gate {
 		}
 
 		// 7. Política efetiva e Verdict imutável.
-		return $this->remember( $key, $this->decide( $failure, $context, $response->reason(), $response->debug_codes() ) );
+		return $this->remember( $key, $this->decide( $failure, $context, $response->reason(), $response->debug_codes() ), $context );
 	}
 
 	/**
@@ -202,12 +202,29 @@ final class Gate {
 	/**
 	 * Memoriza e devolve.
 	 *
-	 * @param string  $key     Chave.
-	 * @param Verdict $verdict Veredito.
+	 * @param string      $key     Chave.
+	 * @param Verdict     $verdict Veredito.
+	 * @param FormContext $context Contexto avaliado.
 	 * @return Verdict
 	 */
-	private function remember( string $key, Verdict $verdict ): Verdict {
+	private function remember( string $key, Verdict $verdict, FormContext $context ): Verdict {
 		$this->memo[ $key ] = $verdict;
+
+		/**
+		 * Uma submissão foi avaliada.
+		 *
+		 * Disparado aqui, e não em `assess()`, de propósito: `remember()` roda uma vez
+		 * por submissão real. A submissão memoizada (mesmo token, segundo hook do mesmo
+		 * request) retorna antes e não passa por aqui — que é o que impede a contagem
+		 * dupla. O toggle do formulário desligado também não chega até aqui.
+		 *
+		 * O `Gate` não conhece telemetria: quem escuta é `Telemetry\Counters`, e só
+		 * quando o operador optou. Sem listener, isto é um `do_action` sem callback.
+		 *
+		 * @param Verdict     $verdict Veredito.
+		 * @param FormContext $context Contexto.
+		 */
+		do_action( 'wp_recaptcha_forms_assessed', $verdict, $context );
 
 		return $verdict;
 	}

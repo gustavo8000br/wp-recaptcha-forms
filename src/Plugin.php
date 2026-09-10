@@ -63,6 +63,15 @@ final class Plugin {
 		Consent\WpConsentApiBridge::boot();
 		Privacy\PrivacyShortcode::boot();
 
+		/*
+		 * Telemetria: só existe no request de quem optou (telemetry-design §3.3).
+		 * Sem opt-in, nem o listener de contagem nem o handler de envio são registrados —
+		 * a instalação que não optou não paga nada, nem uma leitura de option a mais.
+		 */
+		if ( Options::telemetry_enabled() ) {
+			Telemetry\Counters::boot();
+		}
+
 		Admin\SiteHealth::boot();
 
 		if ( is_admin() ) {
