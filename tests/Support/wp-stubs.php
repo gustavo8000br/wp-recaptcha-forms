@@ -39,6 +39,9 @@ final class WpStubs {
 	 */
 	public static $cron = array();
 
+	/** @var array<int, array{url:string, args:array}> Requisições HTTP tentadas. */
+	public static $http = array();
+
 	/** @var array<int, array{0:string,1:array}> */
 	public static $actions_fired = array();
 
@@ -93,6 +96,7 @@ final class WpStubs {
 		self::$option_writes   = array();
 		self::$transients      = array();
 		self::$cron            = array();
+		self::$http            = array();
 		self::$actions_fired   = array();
 		self::$env             = array();
 		self::$post_types      = array();
@@ -244,6 +248,39 @@ function wp_clear_scheduled_hook( $hook, $args = array() ) {
 	unset( WpStubs::$cron[ $hook ] );
 
 	return $count;
+}
+
+function wp_remote_post( $url, $args = array() ) {
+	WpStubs::$http[] = array(
+		'url'  => $url,
+		'args' => $args,
+	);
+
+	$response = apply_filters( 'pre_http_request', false, $args, $url );
+
+	if ( false !== $response ) {
+		return $response;
+	}
+
+	return new WP_Error( 'http_request_failed', 'sem transporte nos testes' );
+}
+
+function wp_remote_retrieve_response_code( $response ) {
+	return is_array( $response ) ? ( $response['response']['code'] ?? 0 ) : 0;
+}
+
+function wp_remote_retrieve_body( $response ) {
+	return is_array( $response ) ? (string) ( $response['body'] ?? '' ) : '';
+}
+
+function wp_remote_retrieve_header( $response, $name ) {
+	if ( ! is_array( $response ) || ! isset( $response['headers'] ) ) {
+		return '';
+	}
+
+	$headers = array_change_key_case( (array) $response['headers'] );
+
+	return $headers[ strtolower( (string) $name ) ] ?? '';
 }
 
 function wp_generate_password( $length = 12, $special_chars = true, $extra_special_chars = false ) {

@@ -70,6 +70,7 @@ final class Plugin {
 		 */
 		if ( Options::telemetry_enabled() ) {
 			Telemetry\Counters::boot();
+			Telemetry\Transport::boot();
 		}
 
 		Admin\SiteHealth::boot();
