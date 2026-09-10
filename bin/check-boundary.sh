@@ -100,6 +100,48 @@ else
 	pass 'nenhum implements de interface do Woo em caminho autocarregável'
 fi
 
+# ---------------------------------------------------------------------------
+# 6. src/Telemetry/ não revela a identidade do site (telemetry-design §1.4, §6.2).
+# ---------------------------------------------------------------------------
+# Fecha o vazamento mais fácil de cometer no desenho inteiro: o envelope sai
+# impecável e o domínio vai junto no User-Agent, ou num campo do payload que
+# alguém acrescentou de boa-fé dois anos depois.
+#
+# O gate casa a MENÇÃO, não só a chamada. É a escolha oposta à do gate 4 acima,
+# e de propósito: lá a regra precisava poder ser citada em comentário no arquivo
+# que a explica; aqui não existe razão legítima para o nome dessas funções
+# aparecer dentro de src/Telemetry/, nem em prosa. O comentário do
+# `Consent.php` descreve a armadilha do hash de domínio sem nomeá-la.
+#
+# `get_locale()` e `determine_locale()` NÃO estão na lista: locale não é URL e
+# não identifica o site. É a exceção nomeada no §6.2, e o bloco `host` do
+# payload depende dela.
+#
+# O User-Agent é 'wp-recaptcha-forms/' . WP_RECAPTCHA_FORMS_VERSION — constante,
+# não função — então não casa nenhum padrão e não precisa de exceção.
+TELEMETRY_DIR="${1:-src/Telemetry/}"
+
+if [ -d "$TELEMETRY_DIR" ]; then
+	HITS="$(grep -rnE --include='*.php' \
+		-e 'site_url' \
+		-e 'home_url' \
+		-e 'get_bloginfo' \
+		-e 'network_site_url' \
+		-e 'network_home_url' \
+		-e "get_option\(\s*['\"](siteurl|home|blogname|admin_email)['\"]" \
+		-e "\\\$_SERVER\[['\"]HTTP_HOST" \
+		-e "\\\$_SERVER\[['\"]SERVER_NAME" \
+		"$TELEMETRY_DIR" || true)"
+
+	if [ -n "$HITS" ]; then
+		fail "$TELEMETRY_DIR revela a identidade do site — o envelope descreve a ORIGEM sem identificar o SITE (telemetry-design §1.4, §6.2). Se o dado é mesmo necessário, ele não pertence à telemetria." "$HITS"
+	else
+		pass 'src/Telemetry/ não revela identidade do site'
+	fi
+else
+	pass "src/Telemetry/ ainda não existe (nada a verificar)"
+fi
+
 if [ "$FAILED" -ne 0 ]; then
 	printf '\nGate de fronteira reprovado.\n' >&2
 	exit 1
