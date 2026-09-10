@@ -18,15 +18,24 @@ Regra de bump (resumida — a íntegra está na Story 1.18):
 
 ### Adicionado
 
-- **Telemetria opt-in, desligada de fábrica** — opção `telemetry` no schema de
-  configuração, com `enabled => false` em instalação nova e em instalação que atualiza.
-  Nenhuma atualização do plugin liga isso. Constante `WRF_TELEMETRY_DISABLE` em
-  `wp-config.php` desliga só a telemetria (e `WRF_DISABLE` continua desligando tudo,
-  telemetria inclusa). Migração de schema 1 → 2 é aditiva. **MINOR** — opção nova
-  retrocompatível, comportamento inalterado para quem não liga (Story 1.26).
-  Mudar o default de `telemetry.enabled` para `true` seria **MAJOR**, pelo mesmo
-  raciocínio que torna MAJOR mudar o default de `CLIENT_UNREACHABLE`; este projeto não
-  pretende fazê-lo.
+- **Telemetria** opt-in, **desligada de fábrica**. Envio semanal e agregado de
+  estatísticas de uso para o autor do plugin: versões de PHP/WordPress/plugin, quais
+  formulários estão protegidos, a configuração, e a **proporção** entre envios aprovados e
+  bloqueados — proporções e faixas de volume, nunca contagens absolutas. Não envia o
+  endereço do site, e-mails, IPs, conteúdo de formulários nem as chaves do reCAPTCHA.
+  - Nova seção **Configurações → reCAPTCHA → Telemetria**, com o botão **"Ver exatamente
+    o que será enviado"**, que mostra o JSON real gerado pelo mesmo código do envio e
+    funciona com o toggle desligado.
+  - Nova constante `WRF_TELEMETRY_DISABLE` para desligar só a telemetria por
+    `wp-config.php`; `WRF_DISABLE` continua desligando tudo, telemetria inclusa.
+  - Nenhuma atualização do plugin liga isso. Desligar apaga o identificador aleatório da
+    instalação, os contadores e o agendamento — é ruptura de vínculo, não pausa.
+  - Continua sem tabela nova no banco: os contadores agregados vivem numa `option`
+    não-autocarregada, e a desinstalação os remove.
+  - Classificação: **MINOR** — opção nova retrocompatível, comportamento inalterado para
+    quem não liga (Stories 1.26–1.34). Mudar o default de `telemetry.enabled` para `true`
+    seria **MAJOR**, pelo mesmo raciocínio que torna MAJOR mudar o default de
+    `CLIENT_UNREACHABLE`; **este projeto não pretende fazê-lo.**
 - Medição de cobertura de código: script `composer test:coverage` (Clover + HTML + resumo
   em texto) e job dedicado no CI em PHP 8.3 com PCOV, publicando o relatório como
   artefato. Publica sem gate — o limiar bloqueante segue como decisão em aberto do dono

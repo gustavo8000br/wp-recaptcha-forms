@@ -56,10 +56,20 @@ A maioria já bate com o que o `@dev`/`@qa` implementaram, mas revisar explicita
       funcionamento do reCAPTCHA (não dá pra hospedar o script proprietário do Google
       localmente) — mesma lógica de plugins de pagamento (Stripe.js, PayPal SDK) já aceitos
       no repositório.
-- [ ] **Rastreamento sem consentimento** — hoje o plugin não tem telemetria nenhuma, então
-      não há risco agora. Se a telemetria opt-in for implementada antes da submissão,
-      revisar que ela é claramente opt-in e documentada (guideline #7 é explícita sobre
-      isso).
+- [ ] **Rastreamento sem consentimento ("phoning home")** — o plugin **tem** telemetria
+      desde as Stories 1.26-1.34, e isso muda o rigor desta linha. Ela é opt-in e
+      desligada de fábrica, o que satisfaz a guideline #7 — **desde que a divulgação
+      esteja no `readme.txt`**, e não apenas no `README.md`: o revisor do WP.org lê o
+      primeiro. A seção de descrição do `readme.txt` precisa dizer, de forma explícita:
+      - que existe um envio de estatísticas de uso para o autor do plugin;
+      - que ele é **opt-in e vem desligado**, e que nenhuma atualização o liga;
+      - o que é enviado e o que **não** é (sem endereço do site, sem IP, sem dados de
+        visitante, sem as chaves do reCAPTCHA);
+      - o link da política de privacidade da API de telemetria;
+      - como desligar por `wp-config.php` (`WRF_TELEMETRY_DISABLE`).
+
+      Dependência: a URL final da API e a política pública são decisão do dono (T-2,
+      rastreada na issue #37) e precisam estar resolvidas antes da submissão.
 - [ ] **Nonces, sanitização, escaping** — já implementado e testado (`SecurityAuditTest.php`,
       Settings API). Revisar mais uma vez como checklist final, não como trabalho novo.
 - [ ] **Slug do plugin** — `wp-recaptcha-forms` não começa com termo de marca (regra é sobre

@@ -43,9 +43,13 @@ O que ele **não** faz, dito na abertura para você não descobrir depois:
   threshold por formulário multiplica a superfície de configuração e a persona que
   precisa dele é rara. Se você precisa, o filtro `wp_recaptcha_forms_verdict` te dá a
   decisão inteira.
-- **Sem telemetria, sem relatórios, sem histórico de bloqueios.** Não há tabela nova no
-  banco. O que existe são dois contadores em transient de uma hora, usados só para um
-  aviso de diagnóstico, e que morrem sozinhos.
+- **Sem telemetria ligada por padrão, sem relatórios, sem histórico de bloqueios.** Não
+  há tabela nova no banco. Existe um envio opcional de estatísticas de uso, **desligado
+  de fábrica**, que só passa a ocorrer se você marcar a caixa em Configurações →
+  reCAPTCHA → Telemetria; a tela mostra o conteúdo exato antes de você decidir. Nenhuma
+  atualização do plugin liga isso por você. O que existe sem telemetria são dois
+  contadores em transient de uma hora, usados só para um aviso de diagnóstico, e que
+  morrem sozinhos.
 - **Não é aconselhamento jurídico.** O texto de privacidade pronto (abaixo) é um ponto de
   partida, e não torna a sua instalação conforme à LGPD ou ao GDPR.
 
@@ -263,6 +267,38 @@ padrão: **o script do Google só é carregado nas páginas que contêm um formu
 protegido.** Em qualquer outra página do seu site, o navegador do visitante não fala com o
 Google por causa deste plugin.
 
+### Telemetria — opcional, desligada de fábrica
+
+O plugin pode enviar ao autor, **uma vez por semana**, um resumo agregado de uso: versões
+de PHP, WordPress e do plugin, quais formulários você protegeu, sua configuração, e a
+**proporção** entre envios aprovados e bloqueados. Proporção, não contagem: o número de
+submissões do seu site é volume de negócio seu, e o envelope carrega apenas uma faixa de
+ordem de grandeza.
+
+Ele **não** envia o endereço do seu site, e-mails, endereços IP, conteúdo de formulários,
+suas chaves do reCAPTCHA, nem qualquer dado dos seus visitantes ou clientes.
+
+Isso é **opt-in**: vem desligado, e nenhuma atualização do plugin liga por você. Em
+**Configurações → reCAPTCHA → Telemetria** há um botão *"Ver exatamente o que será
+enviado"* que mostra o JSON real — gerado pelo mesmo código do envio, não por um exemplo
+escrito à mão — e ele funciona **com o toggle desligado**, porque ninguém deveria decidir
+sobre um dado que só pode ver depois de aceitar enviá-lo.
+
+Desligar apaga o identificador aleatório da instalação. Ao religar, ela é uma instalação
+nova, sem ligação com o histórico anterior — não é pausa, é ruptura.
+
+Para desligar por arquivo, em toda uma frota:
+
+```php
+// wp-config.php — desliga só a telemetria; o resto do plugin continua funcionando.
+define( 'WRF_TELEMETRY_DISABLE', true );
+```
+
+`WRF_DISABLE` também desliga a telemetria, junto com o plugin inteiro.
+
+A política de privacidade da API de telemetria está linkada na própria tela de
+configurações.
+
 ---
 
 ## Consentimento e CMP
@@ -452,8 +488,9 @@ Google"* para "bloquear".
 ### O plugin cria tabelas no banco?
 
 Não. Uma option de configuração, algumas options de estado e dois transients de uma hora.
-A desinstalação varre tudo por prefixo — inclusive as chaves de stories futuras, porque a
-varredura é por prefixo e não por lista.
+Com a telemetria ligada, mais uma option de contadores agregados — ainda uma option, não
+uma tabela, e ela não é autocarregada. A desinstalação varre tudo por prefixo — inclusive
+as chaves de stories futuras, porque a varredura é por prefixo e não por lista.
 
 ---
 

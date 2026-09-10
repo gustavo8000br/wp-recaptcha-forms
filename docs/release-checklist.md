@@ -109,6 +109,37 @@ depois, no Jetpack ou no aplicativo do celular.
 3. Alternar o envio de IP muda o bloco correspondente do texto.
 4. As duas URLs do Google (política de privacidade e termos) respondem **200**.
 
+## Telemetria (telemetry-design §5, Stories 1.26-1.34)
+
+1. Instalação nova: a caixa em **Configurações → reCAPTCHA → Telemetria** vem
+   **desmarcada**, e nada é enviado.
+2. Instalação que **atualiza** a partir de uma versão sem telemetria: continua sem enviar,
+   e o único efeito visível é o toggle novo, desmarcado.
+3. O botão **"Ver exatamente o que será enviado"** funciona com o toggle **desligado**, e
+   o JSON mostrado não contém o endereço do site, `blogname`, `admin_email` nem chave do
+   reCAPTCHA.
+4. Ligar: gera o identificador e agenda o evento cron (`wp cron event list` mostra
+   `wp_recaptcha_forms_telemetry_send`). Desligar: identificador, contadores e agendamento
+   somem.
+5. `define( 'WRF_TELEMETRY_DISABLE', true )` em `wp-config.php` deixa a caixa `disabled`,
+   com a nota, e nada é enviado nem que a opção esteja ligada no banco.
+6. O texto de privacidade ganha o bloco de telemetria **apenas** com ela ligada.
+7. READMEs e `CHANGELOG.md` refletem a telemetria opt-in; quando o `readme.txt` do WP.org
+   existir, ele **tem** que conter a divulgação de "phoning home" (é o arquivo que o
+   revisor lê).
+
+### Bloqueantes desta feature
+
+- [ ] **A política pública da API está publicada e contém a promessa de não registrar o IP
+      de origem** (telemetry-design §1.5, decisão **T-2**). Sem isso o texto que o plugin
+      mostra ao operador é contradito pela infraestrutura. **Bloqueia o release.**
+- [ ] **A URL final do endpoint foi confirmada** e o `TODO(T-2)` de
+      `src/Telemetry/Endpoints.php` foi resolvido. **Bloqueia o release.**
+- [ ] **`docs/prd-v1.md` §6 foi atualizado** para não mais excluir telemetria do escopo
+      (Story 1.35 / issue #37, território **@pm**). **Bloqueia o release.**
+
+---
+
 ## Instalação a partir do zip (BL-07 item 2)
 
 O ambiente de desenvolvimento monta o repositório inteiro em `wp-content/plugins/`, o que
@@ -135,5 +166,7 @@ Conferir **ao vivo, na data do release**, que respondem 200:
 
 ```bash
 composer test              # suíte unitária
-composer check:boundary    # 4 gates de fronteira
+composer check:boundary    # 7 gates de fronteira
+composer lint              # PHPCS com o ruleset WPCS do projeto
+composer i18n:e2e          # gate de pseudo-locale
 ```

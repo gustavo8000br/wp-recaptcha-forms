@@ -42,9 +42,12 @@ What it does **not** do, said up front so you don't find out later:
 - **One global score threshold.** That is a design decision, not a limitation: a threshold
   per form multiplies the configuration surface, and the persona that needs it is rare. If
   you do need it, the `wp_recaptcha_forms_verdict` filter hands you the entire decision.
-- **No telemetry, no reports, no history of blocked submissions.** No new database table.
-  What exists is two one-hour transient counters, used only for a diagnostic notice, and
-  they expire on their own.
+- **No telemetry enabled by default, no reports, no history of blocked submissions.** No
+  new database table. There is an optional usage-statistics send, **off by default**,
+  which only starts happening if you tick the box under Settings → reCAPTCHA → Telemetry;
+  the screen shows you the exact contents before you decide. No plugin update turns it on
+  for you. What exists without telemetry is two one-hour transient counters, used only
+  for a diagnostic notice, and they expire on their own.
 - **It is not legal advice.** The ready-made privacy text (below) is a starting point, and
   it does not make your installation GDPR- or LGPD-compliant.
 
@@ -260,6 +263,37 @@ by default: **Google's script is only loaded on pages that contain a protected f
 any other page of your site, the visitor's browser does not talk to Google because of this
 plugin.
 
+### Telemetry — optional, off by default
+
+The plugin can send the author an aggregate usage summary **once a week**: PHP, WordPress
+and plugin versions, which forms you protected, your configuration, and the **ratio**
+between allowed and blocked submissions. A ratio, not a count: the number of submissions
+your site handles is your business volume, and the envelope carries only an
+order-of-magnitude bucket.
+
+It does **not** send your site address, e-mails, IP addresses, form content, your
+reCAPTCHA keys, or any data about your visitors or customers.
+
+This is **opt-in**: it ships off, and no plugin update turns it on for you. Under
+**Settings → reCAPTCHA → Telemetry** there is a *"See exactly what will be sent"* button
+that shows the real JSON — produced by the same code that does the sending, not by a
+hand-written sample — and it works **with the toggle off**, because nobody should have to
+decide about data they can only see after agreeing to send it.
+
+Turning it off deletes the installation's random identifier. If you turn it back on, it is
+a new installation with no link to the previous history — not a pause, a clean break.
+
+To turn it off from a file, across a whole fleet:
+
+```php
+// wp-config.php — disables telemetry only; the rest of the plugin keeps working.
+define( 'WRF_TELEMETRY_DISABLE', true );
+```
+
+`WRF_DISABLE` also disables telemetry, along with the entire plugin.
+
+The telemetry API's privacy policy is linked from the settings screen itself.
+
 ---
 
 ## Consent and CMPs
@@ -450,9 +484,10 @@ cannot talk to Google"* to "block".
 
 ### Does the plugin create database tables?
 
-No. One settings option, a few state options and two one-hour transients. Uninstalling
-sweeps everything by prefix — including keys from future features, because the sweep is by
-prefix and not by a hand-written list.
+No. One settings option, a few state options and two one-hour transients. With telemetry
+enabled, one more option holding aggregate counters — still an option, not a table, and it
+is not autoloaded. Uninstalling sweeps everything by prefix — including keys from future
+features, because the sweep is by prefix and not by a hand-written list.
 
 ---
 
