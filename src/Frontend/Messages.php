@@ -119,6 +119,21 @@ final class Messages {
 	}
 
 	/**
+	 * Bloco de privacidade da telemetria (telemetry-design §4.3).
+	 *
+	 * Só entra no aviso quando a telemetria está efetivamente ligada. Quando está
+	 * desligada não há bloco nenhum: não se descreve o que não acontece.
+	 *
+	 * A nota jurídica do §4.3 é análise para o dono do plugin, não copy — ela não entra
+	 * aqui. O que o operador publica é esta frase e mais nada.
+	 *
+	 * @return string
+	 */
+	public static function telemetry_notice(): string {
+		return __( 'Este site envia semanalmente ao autor do plugin estatísticas agregadas de uso, sem endereço do site, sem dados de visitantes e sem conteúdo de formulários.', 'wp-recaptcha-forms' );
+	}
+
+	/**
 	 * Mensagem customizada pelo operador, se houver.
 	 *
 	 * @param string $key Chave.

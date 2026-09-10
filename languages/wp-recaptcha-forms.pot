@@ -44,7 +44,7 @@ msgstr ""
 msgid "Ainda não configurado — informe a site key e a secret key para começar a proteger os formulários."
 msgstr ""
 
-#: src/Privacy/PrivacyNotice.php:58
+#: src/Privacy/PrivacyNotice.php:59
 msgid "Além disso, o endereço IP do visitante é enviado ao Google pelo servidor deste site, junto com a verificação de cada envio de formulário."
 msgstr ""
 
@@ -156,7 +156,7 @@ msgstr ""
 msgid "Envios que o Google verificou e reprovou são sempre bloqueados — isso não é configurável, porque torná-lo configurável desligaria o plugin por padrão."
 msgstr ""
 
-#: src/Privacy/PrivacyNotice.php:50
+#: src/Privacy/PrivacyNotice.php:51
 msgid "Esse processamento está sujeito à Política de Privacidade (%1$s) e aos Termos de Serviço (%2$s) do Google."
 msgstr ""
 
@@ -164,11 +164,15 @@ msgstr ""
 msgid "Estado declarado pelo navegador quando a verificação não pôde ser obtida."
 msgstr ""
 
-#: src/Privacy/PrivacyNotice.php:46
+#: src/Frontend/Messages.php:133
+msgid "Este site envia semanalmente ao autor do plugin estatísticas agregadas de uso, sem endereço do site, sem dados de visitantes e sem conteúdo de formulários."
+msgstr ""
+
+#: src/Privacy/PrivacyNotice.php:47
 msgid "Este site usa o reCAPTCHA do Google para proteger formulários contra envios automatizados. Ao interagir com um formulário protegido, o seu navegador carrega um script servido pelo Google, o que expõe ao Google o seu endereço IP, informações do navegador e cookies do domínio google.com."
 msgstr ""
 
-#: src/Privacy/PrivacyNotice.php:44
+#: src/Privacy/PrivacyNotice.php:45
 msgid "Este texto é um ponto de partida para a sua política de privacidade. Ele não é aconselhamento jurídico e não torna a instalação conforme à LGPD ou ao GDPR."
 msgstr ""
 
@@ -264,15 +268,15 @@ msgstr ""
 msgid "O plugin não se integra a nenhuma plataforma de consentimento pelo nome: ele publica um contrato (um filtro no PHP e uma função no JavaScript) que qualquer uma pode chamar. O README traz os trechos prontos."
 msgstr ""
 
-#: src/Privacy/PrivacyNotice.php:64
+#: src/Privacy/PrivacyNotice.php:65
 msgid "O script do reCAPTCHA só é carregado depois que o visitante concede consentimento para cookies e scripts de terceiros."
 msgstr ""
 
-#: src/Privacy/PrivacyNotice.php:55
+#: src/Privacy/PrivacyNotice.php:56
 msgid "O script do reCAPTCHA é carregado apenas nas páginas que contêm um formulário protegido — em qualquer outra página do site, o seu navegador não fala com o Google por causa deste recurso."
 msgstr ""
 
-#: src/Privacy/PrivacyNotice.php:60
+#: src/Privacy/PrivacyNotice.php:61
 msgid "O servidor deste site não envia o endereço IP do visitante ao Google junto com a verificação. Desligar esse envio não impede que o Google receba o endereço IP, porque o script do reCAPTCHA é carregado diretamente do domínio do Google pelo navegador do visitante."
 msgstr ""
 

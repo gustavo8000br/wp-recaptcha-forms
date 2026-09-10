@@ -317,3 +317,6 @@ msgstr "v2 (casilla «No soy un robot»)"
 
 msgid "v3 (invisível, por score) — recomendado"
 msgstr "v3 (invisible, por puntuación) — recomendado"
+
+msgid "Este site envia semanalmente ao autor do plugin estatísticas agregadas de uso, sem endereço do site, sem dados de visitantes e sem conteúdo de formulários."
+msgstr "Este sitio envía semanalmente al autor del plugin estadísticas agregadas de uso, sin la dirección del sitio, sin datos de visitantes y sin contenido de formularios."

@@ -466,9 +466,9 @@ em que as strings foram escritas.
 
 | Idioma | Progresso | Strings |
 |---|---|---|
-| Português (Brasil) — idioma-fonte (`pt_BR`) | `████████████████████` 100% | 102/102 |
-| English (US) (`en_US`) | `████████████████████` 100% | 102/102 |
-| Español (`es_ES`) | `████████████████████` 100% | 102/102 |
+| Português (Brasil) — idioma-fonte (`pt_BR`) | `████████████████████` 100% | 103/103 |
+| English (US) (`en_US`) | `████████████████████` 100% | 103/103 |
+| Español (`es_ES`) | `████████████████████` 100% | 103/103 |
 
 Gerado por `composer i18n:progress` a partir dos `.po` do diretório `languages/`. Não editar à mão.
 

@@ -317,3 +317,6 @@ msgstr "v2 (“I'm not a robot” checkbox)"
 
 msgid "v3 (invisível, por score) — recomendado"
 msgstr "v3 (invisible, score-based) — recommended"
+
+msgid "Este site envia semanalmente ao autor do plugin estatísticas agregadas de uso, sem endereço do site, sem dados de visitantes e sem conteúdo de formulários."
+msgstr "This site sends aggregate usage statistics to the plugin author once a week, with no site address, no visitor data and no form content."

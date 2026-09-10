@@ -8,6 +8,7 @@
 namespace WpRecaptchaForms\Privacy;
 
 use WpRecaptchaForms\Consent\ConsentGate;
+use WpRecaptchaForms\Frontend\Messages;
 use WpRecaptchaForms\Options;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -62,6 +63,22 @@ final class PrivacyNotice {
 
 		if ( ConsentGate::MODE_OFF !== ConsentGate::mode() ) {
 			$blocks[] = __( 'O script do reCAPTCHA só é carregado depois que o visitante concede consentimento para cookies e scripts de terceiros.', 'wp-recaptcha-forms' );
+		}
+
+		/*
+		 * Telemetria (telemetry-design §4.3). Bloco condicional, e a condição é a
+		 * resolução única de `Options::telemetry_enabled()` — que já considera
+		 * WRF_DISABLE e WRF_TELEMETRY_DISABLE. Uma instalação com a opção ligada mas a
+		 * constante definida não envia nada, e portanto não pode dizer que envia.
+		 *
+		 * Desligada: SILÊNCIO TOTAL, nenhum bloco. Diferente do caso do `remoteip`
+		 * acima, em que a frase de não-falsa-conformidade existe porque desligar o envio
+		 * não esconde o visitante do Google. Aqui desligar significa mesmo que nada sai,
+		 * então não há crença errada a corrigir — e descrever o que não acontece só
+		 * empurraria ruído para a política de privacidade do operador.
+		 */
+		if ( Options::telemetry_enabled() ) {
+			$blocks[] = Messages::telemetry_notice();
 		}
 
 		/**

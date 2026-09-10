@@ -161,6 +161,26 @@ $surfaces['mensagens do front'] = implode(
 
 $surfaces['aviso de privacidade'] = PrivacyNotice::render();
 
+$surfaces['aviso de privacidade (telemetria ligada)'] = ( static function () {
+	Options::update_telemetry(
+		array(
+			'enabled'     => true,
+			'instance_id' => str_repeat( 'a', 32 ),
+		)
+	);
+
+	$text = PrivacyNotice::render();
+
+	Options::update_telemetry(
+		array(
+			'enabled'     => false,
+			'instance_id' => '',
+		)
+	);
+
+	return $text;
+} )();
+
 $surfaces['aviso de privacidade (remoteip off)'] = ( static function () {
 	Options::update( array_merge( Options::all(), array( 'remoteip' => false ) ) );
 

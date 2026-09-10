@@ -317,3 +317,6 @@ msgstr "v2 (caixa \"Não sou um robô\")"
 
 msgid "v3 (invisível, por score) — recomendado"
 msgstr "v3 (invisível, por score) — recomendado"
+
+msgid "Este site envia semanalmente ao autor do plugin estatísticas agregadas de uso, sem endereço do site, sem dados de visitantes e sem conteúdo de formulários."
+msgstr "Este site envia semanalmente ao autor do plugin estatísticas agregadas de uso, sem endereço do site, sem dados de visitantes e sem conteúdo de formulários."

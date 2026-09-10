@@ -147,4 +147,65 @@ final class PrivacyNoticeTest extends TestCase {
 	public function test_public_helper(): void {
 		$this->assertStringContainsString( '<p>', wp_recaptcha_forms_privacy_notice() );
 	}
+
+	/**
+	 * Telemetria ligada: o bloco aparece no HTML e no texto plano, e também no conteúdo
+	 * entregue à ferramenta nativa de privacidade e ao shortcode — todos saem do mesmo
+	 * `paragraphs()`.
+	 *
+	 * @return void
+	 */
+	public function test_telemetry_block_when_enabled(): void {
+		Options::update_telemetry(
+			array(
+				'enabled'     => true,
+				'instance_id' => str_repeat( 'a', 32 ),
+			)
+		);
+
+		$plain = PrivacyNotice::render( array( 'format' => 'plain' ) );
+		$html  = PrivacyNotice::render();
+
+		$this->assertStringContainsString( 'estatísticas agregadas de uso', $plain );
+		$this->assertStringContainsString( 'sem dados de visitantes', $plain );
+		$this->assertStringContainsString( 'estat', $html );
+
+		PrivacyShortcode::register_policy_content();
+		$this->assertStringContainsString( 'estatísticas agregadas de uso', WpStubs::$privacy_content[0][1] );
+	}
+
+	/**
+	 * Telemetria desligada: silêncio total. Não se descreve o que não acontece.
+	 *
+	 * @return void
+	 */
+	public function test_no_telemetry_block_when_disabled(): void {
+		$text = PrivacyNotice::render( array( 'format' => 'plain' ) );
+
+		$this->assertStringNotContainsString( 'estatísticas', $text );
+		$this->assertStringNotContainsString( 'autor do plugin', $text );
+		$this->assertStringNotContainsString( 'semanalmente', $text );
+	}
+
+	/**
+	 * Opção ligada mas constante de desligamento definida: nada é enviado, então o texto
+	 * não pode dizer que envia. É o modo de falha que a resolução única existe para
+	 * impedir.
+	 *
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
+	 * @return void
+	 */
+	public function test_no_telemetry_block_when_constant_disables_it(): void {
+		define( 'WRF_TELEMETRY_DISABLE', true );
+
+		Options::update_telemetry(
+			array(
+				'enabled'     => true,
+				'instance_id' => str_repeat( 'a', 32 ),
+			)
+		);
+
+		$this->assertStringNotContainsString( 'estatísticas', PrivacyNotice::render( array( 'format' => 'plain' ) ) );
+	}
 }
