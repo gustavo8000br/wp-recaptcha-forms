@@ -113,6 +113,16 @@ final class PiiGuard {
 	 * @return string Motivo da recusa, ou string vazia.
 	 */
 	private static function walk( $node, string $path = '' ): string {
+		/*
+		 * Objetos são convertidos e varridos como array. Sem isto, qualquer bloco que
+		 * fosse serializado como objeto JSON (ver `by_form` no `Envelope`) escaparia da
+		 * inspeção em silêncio — e um guard com um ponto cego é pior que guard nenhum,
+		 * porque produz confiança sem cobertura.
+		 */
+		if ( is_object( $node ) ) {
+			$node = (array) $node;
+		}
+
 		if ( is_array( $node ) ) {
 			foreach ( $node as $key => $value ) {
 				$here = '' === $path ? (string) $key : $path . '.' . $key;

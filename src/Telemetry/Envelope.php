@@ -226,7 +226,14 @@ final class Envelope {
 			'total_bucket'  => self::total_bucket( $total ),
 			'distribution'  => $distribution,
 			'blocked_share' => self::share( (int) $counters['blocked'], $total ),
-			'by_form'       => $by_form,
+
+			/*
+			 * Objeto, SEMPRE — inclusive vazio. Um array PHP vazio serializa como `[]`, e
+			 * `by_form` alternaria entre `[]` e `{}` conforme houvesse ou não formulário
+			 * acima do corte de amostra. O §3 especifica um objeto, e um consumidor
+			 * tipado quebraria justamente no caso de baixo volume, que é o mais comum.
+			 */
+			'by_form'       => (object) $by_form,
 		);
 	}
 

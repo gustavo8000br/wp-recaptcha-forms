@@ -258,7 +258,7 @@ final class TelemetryEnvelopeTest extends TestCase {
 			)
 		);
 
-		$by_form = Envelope::build()['payload']['verdicts']['by_form'];
+		$by_form = (array) Envelope::build()['payload']['verdicts']['by_form'];
 
 		$this->assertArrayNotHasKey( 'wp_login', $by_form );
 		$this->assertArrayHasKey( 'wp_comment', $by_form );
@@ -285,7 +285,7 @@ final class TelemetryEnvelopeTest extends TestCase {
 			)
 		);
 
-		$this->assertSame( array(), Envelope::build()['payload']['verdicts']['by_form'] );
+		$this->assertSame( array(), (array) Envelope::build()['payload']['verdicts']['by_form'] );
 	}
 
 	/**
@@ -464,5 +464,51 @@ final class TelemetryEnvelopeTest extends TestCase {
 	 */
 	public function test_envelope_is_far_below_the_size_limit(): void {
 		$this->assertLessThan( 64 * 1024, strlen( (string) wp_json_encode( Envelope::build() ) ) );
+	}
+
+	/**
+	 * `by_form` é objeto JSON mesmo vazio.
+	 *
+	 * Um array PHP vazio serializa como `[]`, e o campo alternaria entre `[]` e `{}`
+	 * conforme houvesse ou não formulário acima do corte de amostra — quebrando um
+	 * consumidor tipado exatamente no caso de baixo volume, que é o mais comum.
+	 *
+	 * @return void
+	 */
+	public function test_by_form_is_always_a_json_object(): void {
+		$this->counters(
+			array(
+				'total'   => 10,
+				'by_form' => array(),
+			)
+		);
+
+		$this->assertStringContainsString( '"by_form":{}', (string) wp_json_encode( Envelope::build() ) );
+
+		$this->counters(
+			array(
+				'total'   => 1000,
+				'by_form' => array(
+					'wp_login' => array(
+						'total'              => 100,
+						'client_unreachable' => 0,
+					),
+				),
+			)
+		);
+
+		$this->assertStringContainsString( '"by_form":{"wp_login"', (string) wp_json_encode( Envelope::build() ) );
+	}
+
+	/**
+	 * E o `PiiGuard` continua enxergando dentro dele, apesar de ser objeto.
+	 *
+	 * @return void
+	 */
+	public function test_pii_guard_still_inspects_object_nodes(): void {
+		$this->assertNotSame(
+			'',
+			\WpRecaptchaForms\Telemetry\PiiGuard::inspect( array( 'payload' => (object) array( 'user_email' => 'a@b.com' ) ) )
+		);
 	}
 }
