@@ -18,6 +18,15 @@ Regra de bump (resumida — a íntegra está na Story 1.18):
 
 ### Adicionado
 
+- **Telemetria opt-in, desligada de fábrica** — opção `telemetry` no schema de
+  configuração, com `enabled => false` em instalação nova e em instalação que atualiza.
+  Nenhuma atualização do plugin liga isso. Constante `WRF_TELEMETRY_DISABLE` em
+  `wp-config.php` desliga só a telemetria (e `WRF_DISABLE` continua desligando tudo,
+  telemetria inclusa). Migração de schema 1 → 2 é aditiva. **MINOR** — opção nova
+  retrocompatível, comportamento inalterado para quem não liga (Story 1.26).
+  Mudar o default de `telemetry.enabled` para `true` seria **MAJOR**, pelo mesmo
+  raciocínio que torna MAJOR mudar o default de `CLIENT_UNREACHABLE`; este projeto não
+  pretende fazê-lo.
 - Medição de cobertura de código: script `composer test:coverage` (Clover + HTML + resumo
   em texto) e job dedicado no CI em PHP 8.3 com PCOV, publicando o relatório como
   artefato. Publica sem gate — o limiar bloqueante segue como decisão em aberto do dono

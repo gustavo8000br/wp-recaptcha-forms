@@ -34,8 +34,17 @@ final class Options {
 	/** Advisory de par de chaves cruzado (v1.1 §4.4). */
 	const OPTION_KEYPAIR_SUSPECT = 'wp_recaptcha_forms_keypair_suspect';
 
+	/**
+	 * Contadores agregados da telemetria (telemetry-design §3.3).
+	 *
+	 * Gravada com `autoload = 'no'`: é escrita no caminho quente de submissão e lida
+	 * uma vez por semana no cron. Autocarregá-la faria toda página do site pagar por um
+	 * dado que só o cron consome.
+	 */
+	const OPTION_TELEMETRY_COUNTERS = 'wp_recaptcha_forms_telemetry_counters';
+
 	/** Schema corrente. Incrementar SEMPRE que o formato do array mudar. */
-	const SCHEMA_VERSION = 1;
+	const SCHEMA_VERSION = 2;
 
 	/** Prefixos que o uninstall varre. */
 	const OPTION_PREFIXES = array( 'wp_recaptcha_forms_', 'wrf_' );
@@ -75,6 +84,24 @@ final class Options {
 			),
 			// Estado por formulário. Populado pelo Registry (Story 1.11).
 			'forms'                             => array(),
+			/*
+			 * Telemetria (telemetry-design §4.1). OPT-IN, sempre.
+			 *
+			 * `enabled => false` é o default em instalação nova E em instalação que
+			 * atualiza. Mudar este default para `true` seria release MAJOR, pelo mesmo
+			 * raciocínio que torna MAJOR mudar o default de CLIENT_UNREACHABLE: é
+			 * mudança silenciosa de postura em instalação existente (§7).
+			 * Registro explícito: este projeto NÃO pretende fazê-lo.
+			 *
+			 * `instance_id` nunca é gerado aqui — só em Telemetry\Consent::grant().
+			 */
+			'telemetry'                         => array(
+				'enabled'     => false,
+				'instance_id' => '',
+				'last_sent'   => 0,
+				'last_status' => '', // 'ok' | 'error' | 'pii_suspected' | ''.
+				'seq'         => 0,
+			),
 		);
 	}
 
@@ -107,8 +134,9 @@ final class Options {
 			}
 			$merged = array_merge( self::defaults(), $stored );
 
-			$merged['messages'] = array_merge( self::defaults()['messages'], is_array( $merged['messages'] ?? null ) ? $merged['messages'] : array() );
-			$merged['forms']    = is_array( $merged['forms'] ?? null ) ? $merged['forms'] : array();
+			$merged['messages']  = array_merge( self::defaults()['messages'], is_array( $merged['messages'] ?? null ) ? $merged['messages'] : array() );
+			$merged['forms']     = is_array( $merged['forms'] ?? null ) ? $merged['forms'] : array();
+			$merged['telemetry'] = array_merge( self::defaults()['telemetry'], is_array( $merged['telemetry'] ?? null ) ? $merged['telemetry'] : array() );
 
 			self::$cache = $merged;
 		}
@@ -255,6 +283,81 @@ final class Options {
 	}
 
 	/**
+	 * Sub-array de telemetria, já mesclado com os defaults.
+	 *
+	 * @return array
+	 */
+	public static function telemetry(): array {
+		$value = self::get( 'telemetry', array() );
+
+		return array_merge( self::defaults()['telemetry'], is_array( $value ) ? $value : array() );
+	}
+
+	/**
+	 * A telemetria está efetivamente ligada?
+	 *
+	 * Resolução ÚNICA do estado efetivo (telemetry-design §4.1). Todo o resto do plugin
+	 * pergunta aqui — contadores, transporte, tela de config e texto de privacidade.
+	 * Um segundo lugar que lesse `telemetry.enabled` cru seria o lugar onde a instalação
+	 * envia dado com a constante de desligamento definida.
+	 *
+	 * `instance_id` vazio conta como desligado de propósito: sem identificador não há
+	 * envelope válido, e um "ligado" que não pode enviar é estado mentiroso na tela.
+	 *
+	 * @return bool
+	 */
+	public static function telemetry_enabled(): bool {
+		// Kill switch do plugin inteiro desliga também a telemetria (§4.1 regra 4).
+		if ( defined( 'WRF_DISABLE' ) && WRF_DISABLE ) {
+			return false;
+		}
+
+		// Kill switch dedicado: desliga só a telemetria, o resto do plugin segue.
+		if ( defined( 'WRF_TELEMETRY_DISABLE' ) && WRF_TELEMETRY_DISABLE ) {
+			return false;
+		}
+
+		$telemetry = self::telemetry();
+
+		return true === $telemetry['enabled'] && '' !== (string) $telemetry['instance_id'];
+	}
+
+	/**
+	 * Alguma constante de wp-config.php está desligando a telemetria?
+	 *
+	 * Distinto de `telemetry_enabled()`: a tela precisa dizer "desativado por constante"
+	 * em vez de mostrar um checkbox que não obedece.
+	 *
+	 * @return bool
+	 */
+	public static function telemetry_disabled_by_constant(): bool {
+		return ( defined( 'WRF_DISABLE' ) && WRF_DISABLE )
+			|| ( defined( 'WRF_TELEMETRY_DISABLE' ) && WRF_TELEMETRY_DISABLE );
+	}
+
+	/**
+	 * Identificador aleatório desta instalação, ou string vazia.
+	 *
+	 * @return string
+	 */
+	public static function telemetry_instance_id(): string {
+		return (string) self::telemetry()['instance_id'];
+	}
+
+	/**
+	 * Grava o sub-array de telemetria, preservando o resto das opções.
+	 *
+	 * @param array $values Campos a sobrescrever.
+	 * @return void
+	 */
+	public static function update_telemetry( array $values ): void {
+		$all              = self::all();
+		$all['telemetry'] = array_merge( self::telemetry(), $values );
+
+		self::update( $all );
+	}
+
+	/**
 	 * Versão de schema gravada na instalação.
 	 *
 	 * @return int
@@ -285,14 +388,29 @@ final class Options {
 			}
 		}
 
+		/*
+		 * schema 1 → 2: acrescenta o sub-array `telemetry` (telemetry-design §4.1).
+		 *
+		 * ADITIVO e só. Nunca liga a telemetria, nunca gera `instance_id`, nunca agenda
+		 * cron. Uma instalação que atualiza fica com o toggle novo desmarcado e nada mais
+		 * muda — é exatamente a regra 2 do §4.1 ("uma atualização do plugin nunca liga").
+		 *
+		 * `$from > 0` porque instalação nova (schema 0) já gravou os defaults acima.
+		 */
+		if ( $from > 0 && $from < 2 ) {
+			$stored = get_option( self::OPTION, array() );
+
+			if ( is_array( $stored ) && ! isset( $stored['telemetry'] ) ) {
+				$stored['telemetry'] = self::defaults()['telemetry'];
+				update_option( self::OPTION, $stored );
+			}
+		}
+
 		/**
 		 * Ponto de extensão das migrações futuras.
 		 *
-		 * Cada incremento de SCHEMA_VERSION acrescenta um bloco aqui, jamais reescreve
+		 * Cada incremento de SCHEMA_VERSION acrescenta um bloco acima, jamais reescreve
 		 * os anteriores — uma instalação pode saltar várias versões de uma vez.
-		 *
-		 * Exemplo do formato esperado:
-		 *   if ( $from < 2 ) { ... transforma o array ... }
 		 */
 		do_action( 'wp_recaptcha_forms_upgrade_schema', $from, self::SCHEMA_VERSION );
 
