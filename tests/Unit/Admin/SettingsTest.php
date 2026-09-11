@@ -172,6 +172,34 @@ final class SettingsTest extends TestCase {
 	}
 
 	/**
+	 * `highlight_json()` escapa `& < >` ANTES de tokenizar — se escapasse depois, um
+	 * valor de string contendo `<script>` viraria HTML cru dentro do popup.
+	 *
+	 * @return void
+	 */
+	public function test_json_highlight_escapes_before_tokenizing(): void {
+		$method = new \ReflectionMethod( \WpRecaptchaForms\Admin\SettingsPage::class, 'highlight_json' );
+		$method->setAccessible( true );
+
+		$json = wp_json_encode(
+			array(
+				'evil' => '<script>alert(1)</script>',
+				'n'    => 3,
+				'ok'   => true,
+				'nil'  => null,
+			)
+		);
+		$html = $method->invoke( null, $json );
+
+		$this->assertStringNotContainsString( '<script>alert', $html );
+		$this->assertStringContainsString( '&lt;script&gt;', $html );
+		$this->assertStringContainsString( '<span class="wrf-json-key">"evil"', $html );
+		$this->assertStringContainsString( '<span class="wrf-json-number">3</span>', $html );
+		$this->assertStringContainsString( '<span class="wrf-json-bool">true</span>', $html );
+		$this->assertStringContainsString( '<span class="wrf-json-null">null</span>', $html );
+	}
+
+	/**
 	 * A sonda distingue secret recusada, provedor inalcançável e secret boa.
 	 *
 	 * @return void

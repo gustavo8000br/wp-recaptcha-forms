@@ -189,12 +189,36 @@ final class TelemetrySettingsTest extends TestCase {
 
 		$html = $this->render();
 
-		$this->assertStringContainsString( '<pre class="wrf-telemetry-preview">', $html );
+		$this->assertStringContainsString( 'id="wrf-telemetry-modal"', $html );
 		$this->assertStringContainsString( 'gm.telemetry/v1', $html );
 		$this->assertStringContainsString( 'wp-recaptcha-forms/usage.snapshot/v1', $html );
 		$this->assertStringContainsString( 'usage.snapshot', $html );
 
 		$this->assertEquals( $before, WpStubs::$options, 'a pré-visualização não pode escrever nada' );
+	}
+
+	/**
+	 * O JSON sai formatado com realce de sintaxe (chave/string/número), não como texto
+	 * solto — pedido do dono do site pra substituir o `<pre>` sem formatação.
+	 *
+	 * @return void
+	 */
+	public function test_preview_has_syntax_highlighted_json_in_a_popup(): void {
+		$_GET['wrf_preview'] = '1';
+		$_GET['_wpnonce']    = wp_create_nonce( SettingsPage::PREVIEW_ACTION );
+
+		$html = $this->render();
+
+		$this->assertStringContainsString( '<dialog', $html );
+		$this->assertStringContainsString( 'wrf-json-key', $html );
+		$this->assertStringContainsString( 'wrf-json-string', $html );
+		$this->assertStringContainsString( 'showModal()', $html );
+		$this->assertStringContainsString( 'id="wrf-telemetry-copy"', $html );
+
+		// O `<` de dentro de uma string do envelope (nenhuma tem hoje, mas o gate cobre a
+		// hipótese) sai escapado, nunca como HTML cru — a técnica de realce escapa ANTES
+		// de tokenizar, então isto não pode regredir silenciosamente.
+		$this->assertStringNotContainsString( '<script>alert', $html );
 	}
 
 	/**
@@ -205,11 +229,11 @@ final class TelemetrySettingsTest extends TestCase {
 	public function test_preview_requires_a_nonce(): void {
 		$_GET['wrf_preview'] = '1';
 
-		$this->assertStringNotContainsString( 'wrf-telemetry-preview', $this->render() );
+		$this->assertStringNotContainsString( 'wrf-telemetry-modal', $this->render() );
 
 		$_GET['_wpnonce'] = 'nonce-errado';
 
-		$this->assertStringNotContainsString( 'wrf-telemetry-preview', $this->render() );
+		$this->assertStringNotContainsString( 'wrf-telemetry-modal', $this->render() );
 	}
 
 	/**
@@ -242,7 +266,7 @@ final class TelemetrySettingsTest extends TestCase {
 	 * @return void
 	 */
 	public function test_no_preview_by_default(): void {
-		$this->assertStringNotContainsString( 'wrf-telemetry-preview', $this->render() );
+		$this->assertStringNotContainsString( 'wrf-telemetry-modal', $this->render() );
 	}
 
 	/**
