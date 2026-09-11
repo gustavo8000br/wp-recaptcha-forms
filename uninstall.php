@@ -33,7 +33,10 @@ if ( ! function_exists( 'wp_recaptcha_forms_uninstall_purge_current_site' ) ) {
 	 * que o opt-out garante — a instalação some, e não pode ser recolada ao histórico.
 	 *
 	 * Qualquer artefato de telemetria futuro que NÃO caia sob um destes dois prefixos tem
-	 * de entrar numa lista explícita aqui. Hoje não existe nenhum.
+	 * de entrar numa lista explícita aqui. Hoje o único é o par de eventos de WP-Cron
+	 * (`wp_recaptcha_forms_telemetry_send` / `_retry`), limpo logo abaixo com
+	 * `wp_clear_scheduled_hook()` — eles vivem na option agregada `cron`, fora do alcance
+	 * da varredura por prefixo.
 	 *
 	 * @return void
 	 */
@@ -64,6 +67,16 @@ if ( ! function_exists( 'wp_recaptcha_forms_uninstall_purge_current_site' ) ) {
 				}
 			}
 		}
+
+		/*
+		 * Eventos de WP-Cron não moram na tabela de options sob o nosso prefixo — eles
+		 * ficam todos dentro da option `cron`, agregada. A varredura acima não os alcança.
+		 * Nomes literais de propósito: o autoloader do plugin não é carregado no contexto
+		 * de uninstall, então não dá para referenciar `Telemetry\Schedule::HOOK`. Espelham
+		 * `Schedule::HOOK` e `Schedule::HOOK_RETRY`.
+		 */
+		wp_clear_scheduled_hook( 'wp_recaptcha_forms_telemetry_send' );
+		wp_clear_scheduled_hook( 'wp_recaptcha_forms_telemetry_retry' );
 	}
 }
 

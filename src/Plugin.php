@@ -195,10 +195,16 @@ final class Plugin {
 	 * Não apaga configuração: desativar não é desinstalar. A limpeza total é do
 	 * uninstall.php (S-02).
 	 *
+	 * Desagenda os eventos de telemetria: um cron recorrente cujo callback não
+	 * carrega mais (plugin inativo) fica disparando no vazio para sempre. Não é
+	 * configuração — o opt-in continua gravado, e `Transport::boot()` reagenda no
+	 * próximo carregamento se a telemetria ainda estiver ligada.
+	 *
 	 * @return void
 	 */
 	public static function on_deactivate(): void {
 		delete_transient( 'wp_recaptcha_forms_keypair_total' );
 		delete_transient( 'wp_recaptcha_forms_keypair_invalid' );
+		Telemetry\Schedule::deactivate();
 	}
 }
