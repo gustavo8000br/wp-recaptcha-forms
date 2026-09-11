@@ -10,6 +10,11 @@ on:
   pull_request:
     branches:
       - main
+    # `labeled`/`unlabeled` entram porque o job "Label de versão e CHANGELOG" lê as
+    # labels do payload do evento. Sem eles, uma PR aberta sem label fica travada: a
+    # label aplicada depois não dispara nada, e reexecutar o job só repete o payload
+    # antigo (sem label). Ver Story 1.18.
+    types: [opened, synchronize, reopened, labeled, unlabeled]
 
 # Um PR com vários pushes seguidos cancela as execuções anteriores: só o último commit
 # importa, e minutos de runner não são de graça.
