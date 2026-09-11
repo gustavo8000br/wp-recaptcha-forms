@@ -79,6 +79,27 @@ final class Schedule {
 	}
 
 	/**
+	 * Agenda um envio único, para "agora" (v1.3, pedido do dono).
+	 *
+	 * **Continua sendo cron, não um envio síncrono no request do opt-in** — a regra do
+	 * `Transport` ("nenhum envio parte de um request de submissão") não fala do request
+	 * de opt-in, mas manter TODO envio atrás de `wp_doing_cron()` é a única forma de a
+	 * regra continuar verificável em código em vez de virar exceção decorada por
+	 * comentário. `wp_schedule_single_event()` para "agora" faz o WP-Cron pseudo-cron
+	 * disparar no próximo acesso ao site — na prática, imediato, sem bloquear o
+	 * `admin-post` do save.
+	 *
+	 * Chamado só por `Consent::grant()`, na transição real de opt-in — nunca pela cura de
+	 * agendamento perdido do `Transport::boot()`, que roda em toda request com telemetria
+	 * ligada e reagendaria um envio "imediato" a cada request se chamasse isto também.
+	 *
+	 * @return void
+	 */
+	public static function send_now(): void {
+		wp_schedule_single_event( time(), self::HOOK );
+	}
+
+	/**
 	 * Desagenda tudo. Chamado no opt-out.
 	 *
 	 * @return void
