@@ -1,7 +1,9 @@
 name: Release
 
-# Dispara com uma tag vMAJOR.MINOR.PATCH (ex.: v1.2.0, v1.2.0-beta.1) ou manualmente,
-# informando a mesma tag já existente no repositório.
+# Dispara com uma tag vMAJOR.MINOR.PATCH[-stage] (ex.: v1.2.0, v1.2.0-beta) ou
+# manualmente, informando a mesma tag já existente no repositório.
+# O stage aceito é alpha|beta|rc; sem sufixo a release é estável. Tag com stage vira
+# pré-release no GitHub.
 on:
   push:
     tags:
@@ -57,23 +59,38 @@ jobs:
           php-version: "7.4"
           coverage: none
 
-      - name: Resolver a tag e a versão MAJOR.MINOR.PATCH
+      - name: Resolver a tag, a versão MAJOR.MINOR.PATCH e o stage
         id: version
         run: |
           set -euo pipefail
           TAG="${{ inputs.tag || github.ref_name }}"
-          if [[ ! "$TAG" =~ ^v([0-9]+\.[0-9]+\.[0-9]+) ]]; then
+          if [[ ! "$TAG" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)(-(.+))?$ ]]; then
             echo "::error::Tag '$TAG' não começa com vMAJOR.MINOR.PATCH." >&2
             exit 1
           fi
+          CORE="${BASH_REMATCH[1]}"
+          # Sufixo da tag depois do primeiro '-' é o stage. Tag SemVer limpa = stable.
+          STAGE="${BASH_REMATCH[3]:-stable}"
+          if [[ ! "$STAGE" =~ ^(alpha|beta|rc|stable)$ ]]; then
+            echo "::error::Sufixo '$STAGE' da tag '$TAG' não é um stage válido (alpha|beta|rc|stable)." >&2
+            exit 1
+          fi
+          SHA7="$(git rev-parse --short=7 HEAD)"
+
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
-          echo "core=${BASH_REMATCH[1]}" >> "$GITHUB_OUTPUT"
+          echo "core=$CORE" >> "$GITHUB_OUTPUT"
+          echo "stage=$STAGE" >> "$GITHUB_OUTPUT"
+          echo "build=v${CORE}-${SHA7}-${STAGE}" >> "$GITHUB_OUTPUT"
+          # Pré-release sempre que a tag tiver sufixo de stage (-alpha/-beta/-rc).
+          echo "prerelease=$([[ "$STAGE" == "stable" ]] && echo false || echo true)" >> "$GITHUB_OUTPUT"
 
       # Header do plugin recebe só MAJOR.MINOR.PATCH (WordPress precisa de SemVer limpo
-      # pra comparar versões); a tag completa fica em WP_RECAPTCHA_FORMS_BUILD.
+      # pra comparar versões); a string completa do esquema
+      # `vMAJOR.MINOR.PATCH-HHHHHHH-stage` fica em WP_RECAPTCHA_FORMS_BUILD, com o hash
+      # curto do commit que está sendo buildado.
       # Ver bin/stamp-version.php e arquitetura v1 §11.
       - name: Estampar versão no plugin
-        run: php bin/stamp-version.php "${{ steps.version.outputs.tag }}"
+        run: php bin/stamp-version.php "${{ steps.version.outputs.build }}"
 
       - name: Compilar traduções (.po -> .mo)
         run: |
@@ -116,6 +133,7 @@ jobs:
           tag_name: ${{ steps.version.outputs.tag }}
           name: "v${{ steps.version.outputs.core }}"
           generate_release_notes: true
+          prerelease: ${{ steps.version.outputs.prerelease }}
           files: ${{ steps.artifact.outputs.zip_name }}
 
       - name: Lembrete de verificação manual
