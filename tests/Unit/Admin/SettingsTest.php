@@ -147,6 +147,31 @@ final class SettingsTest extends TestCase {
 	}
 
 	/**
+	 * Bug real de produção (memory limit estourado, referer sem `wrf_preview`, fatal
+	 * dentro de `Options.php`): `register_setting()` liga `Sanitizer::sanitize()` ao
+	 * filtro `sanitize_option_{OPTION}`, e o WordPress dispara esse filtro em TODO
+	 * `update_option()` daquela opção — não só no POST da tela. Ligar telemetria chama
+	 * `Consent::grant()` → `Options::update()` → `update_option()` de DENTRO do próprio
+	 * `sanitize()`, reacionando o callback. Sem o guard de reentrância isto é recursão
+	 * infinita real.
+	 *
+	 * @return void
+	 */
+	public function test_sanitize_does_not_recurse_when_turning_on_telemetry(): void {
+		register_setting(
+			'wp_recaptcha_forms_group',
+			Options::OPTION,
+			array( 'sanitize_callback' => array( Sanitizer::class, 'sanitize' ) )
+		);
+
+		$clean = Sanitizer::sanitize( array( 'telemetry' => array( 'enabled' => '1' ) ) );
+
+		$this->assertTrue( $clean['telemetry']['enabled'] );
+		$this->assertMatchesRegularExpression( '/^[0-9a-f]{32}$/', $clean['telemetry']['instance_id'] );
+		$this->assertTrue( Options::telemetry_enabled() );
+	}
+
+	/**
 	 * A sonda distingue secret recusada, provedor inalcançável e secret boa.
 	 *
 	 * @return void
