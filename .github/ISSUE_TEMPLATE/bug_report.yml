@@ -1,0 +1,108 @@
+name: Bug report
+description: Report something that is broken or behaving incorrectly.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug. Please search [existing issues](../issues) first — someone may have already reported it.
+
+        Fill in every section below. A report that lets a maintainer reproduce the bug on a clean install, without guessing, gets fixed fastest.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: A clear description of the bug. What did you expect to happen instead?
+      placeholder: |
+        Example: I enabled "Send anonymous usage statistics", clicked Save. The page reloaded showing
+        the telemetry preview popup, but the checkbox came back unchecked instead of staying checked.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: The exact sequence of actions, from a clean/known starting state, that produces the bug every time (or most of the time).
+      placeholder: |
+        1. Go to Settings → WP reCAPTCHA Forms
+        2. Check "Send anonymous usage statistics to the plugin author"
+        3. Click "Save Changes"
+        4. Observe the checkbox state after the page reloads
+    validations:
+      required: true
+
+  - type: input
+    id: plugin-version
+    attributes:
+      label: Plugin version
+      description: Settings → WP reCAPTCHA Forms, "Build" line at the bottom of the page. Not the page number, the actual version/build string.
+      placeholder: "e.g. v1.2.0-05a1670-beta"
+    validations:
+      required: true
+
+  - type: input
+    id: wp-version
+    attributes:
+      label: WordPress version
+      placeholder: "e.g. 6.7.1"
+    validations:
+      required: true
+
+  - type: input
+    id: php-version
+    attributes:
+      label: PHP version
+      description: Tools → Site Health → Info → Server, if you're not sure.
+      placeholder: "e.g. 8.2"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: recaptcha-version
+    attributes:
+      label: reCAPTCHA version configured
+      options:
+        - v3 (invisible, score-based)
+        - v2 (checkbox)
+        - Not configured yet
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: integrations
+    attributes:
+      label: Active integrations involved (check any that apply)
+      options:
+        - label: WordPress comments
+        - label: WordPress login
+        - label: WordPress registration
+        - label: WordPress lost password
+        - label: WooCommerce checkout (classic)
+        - label: WooCommerce checkout (Blocks)
+        - label: WooCommerce review
+        - label: WooCommerce lost password
+        - label: None of the above / not integration-specific
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Other plugins/theme that might matter
+      description: List anything you suspect could interact with this bug (security plugins, caching plugins, other form/captcha plugins, custom theme). If you tested with a default theme and only this plugin active, say so — that's useful too.
+      placeholder: "e.g. WooCommerce 9.x, Wordfence, cache plugin X — or: reproduced with a default theme and only this plugin active"
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant error log / screenshot
+      description: |
+        If PHP logged anything (`wp-content/debug.log` with `WP_DEBUG_LOG` on, or your host's PHP error log), paste the relevant lines. Attach a screenshot or screen recording if the bug is visual.
+      render: shell
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Anything else?
+      description: Configuration details, timing, anything that seemed related even if you're not sure it matters.
