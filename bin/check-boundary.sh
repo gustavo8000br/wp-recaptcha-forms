@@ -119,6 +119,13 @@ fi
 #
 # O User-Agent é 'wp-recaptcha-forms/' . WP_RECAPTCHA_FORMS_VERSION — constante,
 # não função — então não casa nenhum padrão e não precisa de exceção.
+#
+# Além da URL do site, o gate barra os identificadores de HOST e de CAMINHO do
+# servidor: um data dir quase sempre carrega o domínio (`.../httpdocs/exemplo.com.br/`),
+# `REMOTE_ADDR` é o IP do visitante (PII pura, §1.4), e `php_uname`/`gethostname`
+# expõem o hostname da máquina. Nada disso descreve a ORIGEM sem identificar a
+# instalação. O guard `if ( ! defined( 'ABSPATH' ) )` no topo de cada arquivo é o
+# único uso legítimo de `ABSPATH` e é filtrado abaixo.
 TELEMETRY_DIR="${1:-src/Telemetry/}"
 
 if [ -d "$TELEMETRY_DIR" ]; then
@@ -131,7 +138,18 @@ if [ -d "$TELEMETRY_DIR" ]; then
 		-e "get_option\(\s*['\"](siteurl|home|blogname|admin_email)['\"]" \
 		-e "\\\$_SERVER\[['\"]HTTP_HOST" \
 		-e "\\\$_SERVER\[['\"]SERVER_NAME" \
-		"$TELEMETRY_DIR" || true)"
+		-e "\\\$_SERVER\[['\"](DOCUMENT_ROOT|SERVER_ADDR|REMOTE_ADDR)" \
+		-e '\bABSPATH\b' \
+		-e '\bWP_CONTENT_DIR\b' \
+		-e '\bWP_CONTENT_URL\b' \
+		-e '\bWP_PLUGIN_DIR\b' \
+		-e '__DIR__|__FILE__' \
+		-e '\bplugin_dir_path\b' \
+		-e '\bwp_upload_dir\b|\bwp_get_upload_dir\b' \
+		-e '\bphp_uname\b' \
+		-e '\bgethostname\b' \
+		-e '\bgethostbyname\b' \
+		"$TELEMETRY_DIR" | grep -vE "! *defined\( *'ABSPATH' *\)" || true)"
 
 	if [ -n "$HITS" ]; then
 		fail "$TELEMETRY_DIR revela a identidade do site — o envelope descreve a ORIGEM sem identificar o SITE (telemetry-design §1.4, §6.2). Se o dado é mesmo necessário, ele não pertence à telemetria." "$HITS"

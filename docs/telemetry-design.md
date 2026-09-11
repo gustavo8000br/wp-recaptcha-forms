@@ -2,27 +2,31 @@
 
 **Autor:** @architect (Aria)
 **Data:** 2026-09-09
-**Status:** **PROPOSTA. Nada aqui está implementado, e nada deve ser implementado antes de aprovação humana explícita.**
-**Escopo:** formato de envelope genérico para `telemetry.gustavomathias.dev` (multi-projeto) + o que este plugin enviaria + consentimento + transporte
-**Contradiz, hoje:** `README.md` linha 46 e `README-EN.md` linha 45 — ver §5
+**Status:** **APROVADO E IMPLEMENTADO no lado do plugin** (Stories 1.26–1.34), lançado
+desligado de fábrica na `1.1.0-beta` (2026-09-10). Continua PENDENTE: o endpoint real e a
+política de privacidade pública da API (T-2), a mudança de PRD §6 (issue #37) e a API de
+ingestão em si (repo `telemetry-api`, revisão de pipeline em andamento). Enquanto T-2 não
+fecha, `Endpoints.php` carrega placeholder e a telemetria não tem para onde enviar.
+**Escopo:** formato de envelope genérico para `telemetry.gustavomathias.dev` (multi-projeto) + o que este plugin envia + consentimento + transporte
+**README:** reconciliado — a abertura agora diz "Sem telemetria **ligada por padrão**"
+(`README.md` linha 46 / `README-EN.md` linha 45), com a seção "Telemetria — opcional,
+desligada por padrão" logo abaixo.
 
 ---
 
 ## 0. Aviso que precede tudo
 
-O produto hoje promete, na abertura do README, em negrito:
+Antes da `1.1.0-beta`, o produto prometia na abertura do README, em negrito, "Sem
+telemetria, sem relatórios, sem histórico de bloqueios". Essa frase era **compromisso de
+privacidade publicado**, e a `1.1.0-beta` a reescreveu — não a apagou: a abertura agora
+diz **"Sem telemetria ligada por padrão"** e a seção seguinte descreve exatamente o
+opt-in, o que sai, o que não sai e como desligar por `wp-config.php`.
 
-> **Sem telemetria, sem relatórios, sem histórico de bloqueios.** Não há tabela nova no banco.
-
-Isso não é detalhe de documentação: é **compromisso de privacidade publicado**, na seção
-"o que ele não faz, dito na abertura para você não descobrir depois". A arquitetura v1.1
-§1.4 reforça, ao registrar contagem por janela como candidato v1.x explicitamente porque
-"contagem é telemetria, que o PRD §6 exclui da v1".
-
-Implementar telemetria é **mudança de escopo de produto**, não incremento técnico. Este
-documento desenha *como* fazer isso sem quebrar a confiança que aquela frase construiu.
-Se a resposta do dono for "não vale a pena", o desenho continua útil para os outros
-projetos dele — a §1 e a §2 não têm nada de WordPress.
+Implementar telemetria foi **mudança de escopo de produto**, não incremento técnico —
+por isso passou pelo pipeline @po → @pm → @architect → @qa e saiu numa versão MINOR
+marcada como pré-release, com a feature nascendo desligada. Este documento desenha *como*
+foi feito sem quebrar a confiança que aquela frase construiu. As §1 e §2 (o envelope
+genérico) não têm nada de WordPress e servem de contrato para os outros projetos do dono.
 
 ---
 

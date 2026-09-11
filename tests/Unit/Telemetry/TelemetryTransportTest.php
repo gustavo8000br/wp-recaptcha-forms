@@ -364,6 +364,36 @@ final class TelemetryTransportTest extends TestCase {
 	}
 
 	/**
+	 * Desativar o plugin desagenda os eventos de telemetria.
+	 *
+	 * M-1 da revisão de QA: um cron recorrente cujo callback não carrega mais (plugin
+	 * inativo) fica disparando no vazio para sempre. O opt-in continua gravado — só o
+	 * agendamento some, e `Transport::boot()` o recria se a telemetria seguir ligada.
+	 *
+	 * @return void
+	 */
+	public function test_deactivation_clears_the_telemetry_cron(): void {
+		WpStubs::reset();
+
+		Options::update_telemetry(
+			array(
+				'enabled'     => true,
+				'instance_id' => str_repeat( 'a', 32 ),
+			)
+		);
+
+		( new \WpRecaptchaForms\Plugin() )->boot();
+		Schedule::activate();
+
+		$this->assertNotFalse( wp_next_scheduled( Schedule::HOOK ), 'pré-condição: o envio semanal está agendado' );
+
+		\WpRecaptchaForms\Plugin::on_deactivate();
+
+		$this->assertFalse( wp_next_scheduled( Schedule::HOOK ) );
+		$this->assertFalse( wp_next_scheduled( Schedule::HOOK_RETRY ) );
+	}
+
+	/**
 	 * O endpoint está numa constante única e é filtrável para o ambiente de teste do
 	 * autor.
 	 *

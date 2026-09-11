@@ -16,6 +16,12 @@ Regra de bump (resumida — a íntegra está na Story 1.18):
 
 ## [Unreleased]
 
+## [1.1.0-beta] - 2026-09-10
+
+Primeira versão com **telemetria** — opção nova, retrocompatível, **desligada de
+fábrica**. É o que classifica o salto como **MINOR** sobre a `1.0.0-beta`. Stage `beta`:
+a release sai marcada como pré-release no GitHub.
+
 ### Adicionado
 
 - **Telemetria** opt-in, **desligada de fábrica**. Envio semanal e agregado de
@@ -36,10 +42,43 @@ Regra de bump (resumida — a íntegra está na Story 1.18):
     quem não liga (Stories 1.26–1.34). Mudar o default de `telemetry.enabled` para `true`
     seria **MAJOR**, pelo mesmo raciocínio que torna MAJOR mudar o default de
     `CLIENT_UNREACHABLE`; **este projeto não pretende fazê-lo.**
+  - O endpoint e a política de privacidade da API de telemetria ainda são placeholder
+    (`docs/telemetry-design.md` T-2). Enquanto não forem definidos, a telemetria não tem
+    para onde enviar mesmo que ligada — e é por isso que esta versão é `beta`.
 - Medição de cobertura de código: script `composer test:coverage` (Clover + HTML + resumo
   em texto) e job dedicado no CI em PHP 8.3 com PCOV, publicando o relatório como
   artefato. Publica sem gate — o limiar bloqueante segue como decisão em aberto do dono
   do produto, registrada em `docs/architecture-coverage.md` §6 (issue #27).
+- `docs/wordpress-org-submission-plan.md`: o mapa da submissão ao repositório oficial do
+  WordPress.org (SVN, `readme.txt`, assets, checklist das 18 diretrizes). Ainda não
+  executada — depende de conta no WordPress.org e da decisão T-2.
+
+### Corrigido
+
+- `uninstall.php` não removia os dois eventos de WP-Cron da telemetria
+  (`wp_recaptcha_forms_telemetry_send` e `_retry`): eles vivem na `option` agregada
+  `cron`, fora do alcance da varredura por prefixo, e ficavam agendados **para sempre**
+  depois de apagar o plugin. Agora são limpos com `wp_clear_scheduled_hook()` (M-1 da
+  revisão de QA da telemetria).
+- `Plugin::on_deactivate()` passa a desagendar a telemetria: um cron recorrente cujo
+  callback não carrega mais (plugin inativo) disparava no vazio a cada semana. O opt-in
+  continua gravado; `Transport::boot()` reagenda se a telemetria seguir ligada (M-1).
+- O gate de fronteira de `src/Telemetry/` (`bin/check-boundary.sh`) não cobria path nem
+  host do servidor. Passa a barrar também `$_SERVER['DOCUMENT_ROOT'|'SERVER_ADDR'|
+  'REMOTE_ADDR']`, `ABSPATH`, `WP_CONTENT_DIR`/`WP_CONTENT_URL`, `WP_PLUGIN_DIR`,
+  `__DIR__`/`__FILE__`, `plugin_dir_path`, `wp_upload_dir`/`wp_get_upload_dir`,
+  `php_uname`, `gethostname` e `gethostbyname` — sem falso-positivo no guard
+  `! defined( 'ABSPATH' )` (M-2 da revisão de QA da telemetria).
+
+## [1.0.0-beta] - 2026-09-09
+
+Plugin-base: reCAPTCHA v2/v3 em login, registro, recuperação de senha, comentários,
+avaliações de produto e checkout do WooCommerce, com WooCommerce opcional em tempo de
+execução, kill switch, política por classe de falha e i18n pt-BR / en-US / es-ES.
+**Sem telemetria** nesta versão.
+
+### Adicionado
+
 - Licença GPLv2-or-later em `LICENSE`, coerente com o header do plugin e com o
   `composer.json` (Story 1.19).
 - Workflow de CI (`.github/workflows/ci.yml`) rodando testes, gate de fronteira, gate de
@@ -76,4 +115,6 @@ Regra de bump (resumida — a íntegra está na Story 1.18):
   visíveis já estavam corretamente marcadas com o text domain `wp-recaptcha-forms`. O gate
   de pseudo-locale entra como prevenção, não como correção.
 
-[Unreleased]: https://github.com/gustavo8000br/wp-recaptcha-forms/commits/main
+[Unreleased]: https://github.com/gustavo8000br/wp-recaptcha-forms/compare/v1.1.0-beta...main
+[1.1.0-beta]: https://github.com/gustavo8000br/wp-recaptcha-forms/releases/tag/v1.1.0-beta
+[1.0.0-beta]: https://github.com/gustavo8000br/wp-recaptcha-forms/releases/tag/v1.0.0-beta

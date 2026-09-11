@@ -90,17 +90,32 @@ final class TelemetryBoundaryGateTest extends TestCase {
 	 */
 	public function leaks(): array {
 		return array(
-			'home_url'         => array( '$ua = "wrf/1.0 (" . home_url() . ")";' ),
-			'site_url'         => array( '$x = site_url();' ),
-			'get_bloginfo'     => array( '$x = get_bloginfo( "name" );' ),
-			'network_site_url' => array( '$x = network_site_url();' ),
-			'network_home_url' => array( '$x = network_home_url();' ),
-			'option siteurl'   => array( '$x = get_option( "siteurl" );' ),
-			'option blogname'  => array( '$x = get_option( \'blogname\' );' ),
-			'option adminmail' => array( '$x = get_option( "admin_email" );' ),
-			'HTTP_HOST'        => array( '$x = $_SERVER["HTTP_HOST"];' ),
-			'SERVER_NAME'      => array( '$x = $_SERVER[\'SERVER_NAME\'];' ),
-			'em comentario'    => array( '// nunca use site_url() aqui.' ),
+			'home_url'          => array( '$ua = "wrf/1.0 (" . home_url() . ")";' ),
+			'site_url'          => array( '$x = site_url();' ),
+			'get_bloginfo'      => array( '$x = get_bloginfo( "name" );' ),
+			'network_site_url'  => array( '$x = network_site_url();' ),
+			'network_home_url'  => array( '$x = network_home_url();' ),
+			'option siteurl'    => array( '$x = get_option( "siteurl" );' ),
+			'option blogname'   => array( '$x = get_option( \'blogname\' );' ),
+			'option adminmail'  => array( '$x = get_option( "admin_email" );' ),
+			'HTTP_HOST'         => array( '$x = $_SERVER["HTTP_HOST"];' ),
+			'SERVER_NAME'       => array( '$x = $_SERVER[\'SERVER_NAME\'];' ),
+			'em comentario'     => array( '// nunca use site_url() aqui.' ),
+			'DOCUMENT_ROOT'     => array( '$x = $_SERVER["DOCUMENT_ROOT"];' ),
+			'SERVER_ADDR'       => array( '$x = $_SERVER[\'SERVER_ADDR\'];' ),
+			'REMOTE_ADDR'       => array( '$x = $_SERVER["REMOTE_ADDR"];' ),
+			'ABSPATH concat'    => array( '$p = ABSPATH . "wp-load.php";' ),
+			'WP_CONTENT_DIR'    => array( '$p = WP_CONTENT_DIR;' ),
+			'WP_CONTENT_URL'    => array( '$p = WP_CONTENT_URL;' ),
+			'WP_PLUGIN_DIR'     => array( '$p = WP_PLUGIN_DIR;' ),
+			'php_uname'         => array( '$x = php_uname();' ),
+			'gethostname'       => array( '$x = gethostname();' ),
+			'gethostbyname'     => array( '$x = gethostbyname( "localhost" );' ),
+			'__DIR__'           => array( '$p = __DIR__ . "/x.php";' ),
+			'__FILE__'          => array( '$p = __FILE__;' ),
+			'plugin_dir_path'   => array( '$p = plugin_dir_path( "x" );' ),
+			'wp_upload_dir'     => array( '$p = wp_upload_dir();' ),
+			'wp_get_upload_dir' => array( '$p = wp_get_upload_dir();' ),
 		);
 	}
 
@@ -132,6 +147,17 @@ final class TelemetryBoundaryGateTest extends TestCase {
 	 */
 	public function test_real_user_agent_passes(): void {
 		$this->assertSame( 0, $this->run_gate( '$ua = "wp-recaptcha-forms/" . WP_RECAPTCHA_FORMS_VERSION;' ) );
+	}
+
+	/**
+	 * O guard `if ( ! defined( 'ABSPATH' ) )` no topo de cada arquivo é o único uso
+	 * legítimo de `ABSPATH` e NÃO pode reprovar — senão o gate barra o próprio padrão
+	 * de segurança do WordPress.
+	 *
+	 * @return void
+	 */
+	public function test_abspath_guard_is_not_a_false_positive(): void {
+		$this->assertSame( 0, $this->run_gate( "if ( ! defined( 'ABSPATH' ) ) {\n\texit;\n}" ) );
 	}
 
 	/**

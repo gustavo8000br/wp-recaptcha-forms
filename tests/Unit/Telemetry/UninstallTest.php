@@ -106,4 +106,19 @@ final class UninstallTest extends TestCase {
 		$this->assertStringContainsString( 'instance_id', $source );
 		$this->assertStringContainsString( Options::OPTION_TELEMETRY_COUNTERS, $source );
 	}
+
+	/**
+	 * Os eventos de WP-Cron da telemetria vivem na option agregada `cron`, fora do
+	 * alcance da varredura por prefixo — o `uninstall.php` tem de limpá-los à parte
+	 * com `wp_clear_scheduled_hook()`, senão sobra agendamento órfão depois de apagar
+	 * o plugin (M-1 da revisão de QA da telemetria).
+	 *
+	 * @return void
+	 */
+	public function test_uninstall_clears_telemetry_cron_events(): void {
+		$source = (string) file_get_contents( dirname( __DIR__, 3 ) . '/uninstall.php' );
+
+		$this->assertStringContainsString( "wp_clear_scheduled_hook( 'wp_recaptcha_forms_telemetry_send' )", $source );
+		$this->assertStringContainsString( "wp_clear_scheduled_hook( 'wp_recaptcha_forms_telemetry_retry' )", $source );
+	}
 }
