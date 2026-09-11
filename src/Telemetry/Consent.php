@@ -55,6 +55,15 @@ final class Consent {
 
 		Schedule::activate();
 
+		/*
+		 * Primeiro envio imediato (v1.3, pedido do dono): sem isto, o operador liga o
+		 * toggle e só vê o primeiro dado até 7 dias depois (o jitter da semana), sem
+		 * nenhuma confirmação de que a instalação está realmente enviando. Só na
+		 * transição real de opt-in — não em toda vez que `Schedule::activate()` é
+		 * chamado (ver docblock de `send_now()`).
+		 */
+		Schedule::send_now();
+
 		self::announce( true );
 	}
 

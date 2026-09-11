@@ -99,6 +99,43 @@ final class TelemetryConsentTest extends TestCase {
 	}
 
 	/**
+	 * `grant()` também agenda um envio ÚNICO pra agora, além do semanal (v1.3) — pra o
+	 * operador não esperar até 7 dias pela confirmação de que está enviando.
+	 *
+	 * @return void
+	 */
+	public function test_grant_also_schedules_an_immediate_send(): void {
+		Consent::grant();
+
+		$events = WpStubs::$cron[ Schedule::HOOK ];
+
+		$this->assertCount( 2, $events, 'espera o evento semanal (recorrente) + o imediato (único)' );
+		$this->assertSame( Schedule::RECURRENCE, $events[0]['recurrence'], 'o [0] continua sendo o semanal — SettingsTest e outros dependem disso' );
+		$this->assertFalse( $events[1]['recurrence'], 'o [1] é o envio único' );
+		$this->assertLessThanOrEqual( time(), $events[1]['timestamp'] );
+	}
+
+	/**
+	 * A cura de agendamento perdido (`Transport::boot()` → `Schedule::activate()`) NÃO
+	 * pode reagendar um envio imediato a cada request — só `Consent::grant()` faz isso.
+	 *
+	 * @return void
+	 */
+	public function test_activate_alone_never_schedules_an_immediate_send(): void {
+		Options::update_telemetry(
+			array(
+				'enabled'     => true,
+				'instance_id' => str_repeat( 'a', 32 ),
+			)
+		);
+
+		Schedule::activate();
+
+		$this->assertCount( 1, WpStubs::$cron[ Schedule::HOOK ] );
+		$this->assertSame( Schedule::RECURRENCE, WpStubs::$cron[ Schedule::HOOK ][0]['recurrence'] );
+	}
+
+	/**
 	 * O jitter é determinístico por instalação: a mesma instalação cai sempre no mesmo
 	 * ponto da semana, e a base fica espalhada.
 	 *
