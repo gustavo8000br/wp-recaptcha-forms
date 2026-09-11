@@ -16,6 +16,22 @@ Regra de bump (resumida — a íntegra está na Story 1.18):
 
 ## [Unreleased]
 
+## [1.2.1-beta] - 2026-09-11
+
+### Corrigido
+
+- **Checkbox de telemetria "desmarcava sozinho" depois de salvar.** Ligar telemetria (sem
+  mexer em mais nada) e clicar em Salvar fazia a tela recarregar com o toggle desmarcado,
+  mesmo a gravação real tendo funcionado. Causa: `update_option()` do WordPress dispara
+  `sanitize_option_{OPTION}` SINCRONAMENTE dentro de si mesma, e o callback real
+  (`SettingsPage::sanitize()`) lê `Options::all()` para `$previous` ANTES de delegar ao
+  `Sanitizer` — inclusive na chamada reentrante que `Consent::grant()` dispara enquanto o
+  banco ainda está no estado PRÉ-escrita. Essa leitura repovoava `Options::$cache` com o
+  valor velho, e ele sobrevivia depois que a escrita de verdade já tinha acontecido.
+  Corrigido zerando o cache de novo ao final de `Options::update()`, forçando a próxima
+  leitura no mesmo request a ser sempre fresca. Achado real reportado em produção logo
+  após o fix da recursão (v1.2.0-beta).
+
 ## [1.2.0-beta] - 2026-09-11
 
 ### Corrigido

@@ -168,6 +168,23 @@ final class Options {
 	public static function update( array $values ): void {
 		self::$cache = null;
 		update_option( self::OPTION, $values );
+
+		/*
+		 * Bug real de produção (checkbox de telemetria "desmarca sozinho" depois de
+		 * salvar): `update_option()` do WordPress dispara `sanitize_option_{OPTION}`
+		 * SÍNCRONO durante esta própria chamada, e o callback registrado
+		 * (`SettingsPage::sanitize()`) lê `Options::all()` para `$previous` ANTES de
+		 * delegar a `Admin\Sanitizer` — enquanto o banco ainda tem o valor PRÉ-escrita
+		 * (esta função ainda não terminou o `update_option()` acima). Essa leitura
+		 * repovoa `self::$cache` com o valor velho, e ele sobrevive DEPOIS que este
+		 * `update_option()` retorna — poluindo qualquer leitura seguinte no mesmo
+		 * request (ex.: `Schedule::activate()` chamado logo depois por
+		 * `Consent::grant()`) com o estado de antes da escrita.
+		 *
+		 * Zerar de novo aqui garante que a PRÓXIMA leitura, depois que esta função já
+		 * escreveu no banco, seja sempre fresca.
+		 */
+		self::$cache = null;
 	}
 
 	/**

@@ -3,7 +3,7 @@
  * Plugin Name:       WP reCAPTCHA Forms
  * Plugin URI:        https://github.com/gustavo8000br/wp-recaptcha-forms
  * Description:       Protege formulários do WordPress, WooCommerce e Newsletter com o reCAPTCHA do Google, com política de falha configurável e sem quebrar cache de página.
- * Version:           1.2.0
+ * Version:           1.2.1
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            Gustavo Mathias Rocha
@@ -27,13 +27,13 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Versão do plugin. Espelha exatamente o header (arquitetura v1 §11).
  * Usada em wp_enqueue_script() como cache-bust de asset.
  */
-define( 'WP_RECAPTCHA_FORMS_VERSION', '1.2.0' );
+define( 'WP_RECAPTCHA_FORMS_VERSION', '1.2.1' );
 
 /**
  * String completa de build (vMAJOR.MINOR.PATCH-HHHHHHH-stage).
  * Diagnóstico apenas: rodapé da tela de config e Site Health. Nunca vai em URL de asset.
  */
-define( 'WP_RECAPTCHA_FORMS_BUILD', 'v1.2.0-0000000-beta' );
+define( 'WP_RECAPTCHA_FORMS_BUILD', 'v1.2.1-0000000-beta' );
 
 define( 'WP_RECAPTCHA_FORMS_FILE', __FILE__ );
 define( 'WP_RECAPTCHA_FORMS_DIR', plugin_dir_path( __FILE__ ) );

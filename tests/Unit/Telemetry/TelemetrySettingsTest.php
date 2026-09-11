@@ -71,6 +71,45 @@ final class TelemetrySettingsTest extends TestCase {
 	}
 
 	/**
+	 * Salva pelo caminho REAL do WordPress: `update_option()` disparando o filtro
+	 * `sanitize_option_{OPTION}`, não a chamada manual que `save()` faz.
+	 *
+	 * @param array $input Entrada crua, como o navegador enviaria.
+	 * @return void
+	 */
+	private function save_via_real_update_option( array $input ): void {
+		( new SettingsPage() )->register_settings();
+
+		update_option( Options::OPTION, $input );
+	}
+
+	/**
+	 * Bug real de produção: ligar telemetria e salvar (sem mexer em mais nada) fazia o
+	 * checkbox voltar DESMARCADO depois do reload.
+	 *
+	 * Causa: `update_option()` do WordPress dispara `sanitize_option_{OPTION}`
+	 * SINCRONAMENTE dentro de si mesma, e o callback real (`SettingsPage::sanitize()`)
+	 * lê `Options::all()` para `$previous` ANTES de delegar ao `Sanitizer` — inclusive
+	 * na chamada REENTRANTE que `Consent::grant()` dispara (via `Options::update()` →
+	 * `update_option()` de novo, ainda com o banco no estado PRÉ-escrita). Essa leitura
+	 * repovoa `Options::$cache` com o valor velho, e ele sobrevivia depois que a escrita
+	 * de verdade já tinha acontecido — poluindo a leitura seguinte com o estado de
+	 * antes do save. `save()`/`Options::update()` manual (usado no resto desta suíte)
+	 * NÃO exercita esse caminho — só `update_option()` de verdade dispara o filtro.
+	 *
+	 * @return void
+	 */
+	public function test_enabling_telemetry_via_real_update_option_persists(): void {
+		$this->save_via_real_update_option( array( 'telemetry' => array( 'enabled' => '1' ) ) );
+
+		// Simula um NOVO request: a leitura seguinte não pode herdar cache do save.
+		Options::flush_cache();
+
+		$this->assertTrue( Options::telemetry_enabled() );
+		$this->assertMatchesRegularExpression( '/^[0-9a-f]{32}$/', Options::telemetry_instance_id() );
+	}
+
+	/**
 	 * A seção existe e vem DEPOIS de todas as que afetam o funcionamento.
 	 *
 	 * @return void
