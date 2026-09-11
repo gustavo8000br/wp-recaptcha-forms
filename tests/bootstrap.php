@@ -12,8 +12,8 @@
 define( 'ABSPATH', __DIR__ . '/' );
 define( 'WP_RECAPTCHA_FORMS_DIR', dirname( __DIR__ ) . '/' );
 define( 'WP_RECAPTCHA_FORMS_URL', 'https://example.test/wp-content/plugins/wp-recaptcha-forms/' );
-define( 'WP_RECAPTCHA_FORMS_VERSION', '0.1.0' );
-define( 'WP_RECAPTCHA_FORMS_BUILD', 'v0.1.0-test-alpha' );
+define( 'WP_RECAPTCHA_FORMS_VERSION', '1.1.0' );
+define( 'WP_RECAPTCHA_FORMS_BUILD', 'v1.1.0-0000000-beta' );
 define( 'WP_RECAPTCHA_FORMS_FILE', dirname( __DIR__ ) . '/wp-recaptcha-forms.php' );
 define( 'HOUR_IN_SECONDS', 3600 );
 define( 'MINUTE_IN_SECONDS', 60 );

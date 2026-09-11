@@ -58,7 +58,7 @@ Interceptei a requisição real por `pre_http_request` e inspecionei os argument
 ```
 URL: https://telemetry.gustavomathias.dev/v1/ingest
 timeout: 5 | redirection: 0 | blocking: true | sslverify: true
-header User-Agent: wp-recaptcha-forms/0.1.0
+header User-Agent: wp-recaptcha-forms/1.1.0
 header Idempotency-Key: abc-123
 ```
 
