@@ -16,6 +16,25 @@ Regra de bump (resumida — a íntegra está na Story 1.18):
 
 ## [Unreleased]
 
+## [1.2.0-beta] - 2026-09-11
+
+### Corrigido
+
+- **Recursão infinita real, memória estourada ao ligar a telemetria.** `register_setting()`
+  liga `Sanitizer::sanitize()` ao filtro `sanitize_option_{OPTION}`, e o WordPress dispara
+  esse filtro em todo `update_option()` daquela opção — não só no POST da tela. Ligar a
+  telemetria chamava `Consent::grant()` → `Options::update()` → `update_option()` de
+  DENTRO do próprio `sanitize()`, reacionando o callback e recursando até o memory limit
+  do PHP. Corrigido com um guard de reentrância em `Sanitizer::sanitize()`. Achado real de
+  produção (três dos três "Allowed memory size exhausted" já registrados no site apontavam
+  pra esta tela).
+
+### Alterado
+
+- A pré-visualização "Ver exatamente o que será enviado" agora abre num popup (`<dialog>`
+  nativo, com fundo escurecido e fechamento por Esc/clique fora) com o JSON em realce de
+  sintaxe e um botão "Copiar JSON", no lugar do bloco `<pre>` sem formatação.
+
 ## [1.1.0-beta] - 2026-09-10
 
 Primeira versão com **telemetria** — opção nova, retrocompatível, **desligada de

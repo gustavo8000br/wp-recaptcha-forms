@@ -367,3 +367,15 @@ msgstr "See exactly what will be sent"
 
 msgid "Último envio: não concluído. Isso não afeta a proteção dos seus formulários."
 msgstr "Last send: not completed. This does not affect the protection of your forms."
+
+#: src/Admin/SettingsPage.php
+msgid "Copiado!"
+msgstr "Copied!"
+
+#: src/Admin/SettingsPage.php
+msgid "Copiar JSON"
+msgstr "Copy JSON"
+
+#: src/Admin/SettingsPage.php
+msgid "Fechar"
+msgstr "Close"

@@ -188,6 +188,14 @@ function get_option( $name, $default = false ) {
 }
 
 function update_option( $name, $value, $autoload = null ) {
+	// Fiel ao WordPress real: `update_option()` sempre passa o valor por
+	// `sanitize_option_{$name}` antes de gravar, pra QUALQUER chamada — não só a do POST
+	// da Settings API. `register_setting()` liga o `sanitize_callback` nesse mesmo filtro.
+	// Faltava isto no stub, e foi por causa dessa lacuna que a suite nunca pegou a
+	// recursão infinita real do `Sanitizer::sanitize()` (bug de produção, memory limit
+	// estourado em `Options.php`).
+	$value = apply_filters( "sanitize_option_{$name}", $value, $name );
+
 	WpStubs::$options[ $name ]       = $value;
 	WpStubs::$option_writes[ $name ] = ( WpStubs::$option_writes[ $name ] ?? 0 ) + 1;
 
@@ -196,6 +204,22 @@ function update_option( $name, $value, $autoload = null ) {
 	}
 
 	return true;
+}
+
+/**
+ * Stub mínimo de `register_setting()`: só o que o núcleo usa — ligar o
+ * `sanitize_callback` ao filtro `sanitize_option_{$option_name}`, que é o mecanismo real
+ * que `update_option()` dispara.
+ *
+ * @param string $option_group Grupo (ignorado pelo stub, como no WordPress real pra este uso).
+ * @param string $option_name  Nome da option.
+ * @param array  $args         Args do register_setting, incluindo `sanitize_callback`.
+ * @return void
+ */
+function register_setting( $option_group, $option_name, $args = array() ) {
+	if ( ! empty( $args['sanitize_callback'] ) ) {
+		add_filter( "sanitize_option_{$option_name}", $args['sanitize_callback'] );
+	}
 }
 
 function add_option( $name, $value, $deprecated = '', $autoload = 'yes' ) {

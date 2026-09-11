@@ -80,7 +80,7 @@ msgstr ""
 msgid "Build: %s"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:615
+#: src/Admin/SettingsPage.php:620
 msgid "Cada visualização gera um identificador de envio novo, e o número de sequência mostrado é o do próximo envio. O restante é o estado real desta instalação."
 msgstr ""
 
@@ -122,6 +122,15 @@ msgstr ""
 
 #: src/Consent/ConsentGate.php:135
 msgid "Consentimento: não exigido — o script do Google carrega em toda página com formulário protegido."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:624
+msgid "Copiado!"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:624
+#: src/Admin/SettingsPage.php:624
+msgid "Copiar JSON"
 msgstr ""
 
 #: src/Admin/SettingsPage.php:325
@@ -204,6 +213,10 @@ msgstr ""
 msgid "Exigir — não carrega sem consentimento explícito"
 msgstr ""
 
+#: src/Admin/SettingsPage.php:618
+msgid "Fechar"
+msgstr ""
+
 #: src/Admin/SettingsPage.php:450
 msgid "Formulário"
 msgstr ""
@@ -248,7 +261,7 @@ msgstr ""
 msgid "Nenhuma integração de formulário está registrada nesta instalação."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:631
+#: src/Admin/SettingsPage.php:730
 msgid "Newsletter"
 msgstr ""
 
@@ -296,7 +309,7 @@ msgstr ""
 msgid "O plugin não se integra a nenhuma plataforma de consentimento pelo nome: ele publica um contrato (um filtro no PHP e uma função no JavaScript) que qualquer uma pode chamar. O README traz os trechos prontos."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:614
+#: src/Admin/SettingsPage.php:617
 msgid "O que seria enviado agora"
 msgstr ""
 
@@ -445,11 +458,11 @@ msgstr ""
 msgid "WP reCAPTCHA Forms: todas as verificações recentes falharam. A causa mais provável é a site key e a secret key pertencerem a projetos diferentes no console do Google. Confira as duas chaves."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:628
+#: src/Admin/SettingsPage.php:727
 msgid "WooCommerce"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:634
+#: src/Admin/SettingsPage.php:733
 msgid "WordPress"
 msgstr ""
 

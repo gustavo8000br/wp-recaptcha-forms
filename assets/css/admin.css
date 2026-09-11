@@ -12,3 +12,78 @@
 .wrf-settings table.widefat th {
 	vertical-align: middle;
 }
+
+/* Popup "O que seria enviado agora" (pré-visualização da telemetria). */
+.wrf-telemetry-modal {
+	width: min(46em, calc(100vw - 3em));
+	max-height: min(80vh, 40em);
+	padding: 1.5em;
+	border: none;
+	border-radius: 8px;
+	box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+}
+
+.wrf-telemetry-modal::backdrop {
+	background: rgba(0, 0, 0, 0.5);
+}
+
+.wrf-telemetry-modal-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 0.5em;
+}
+
+.wrf-telemetry-modal-header h3 {
+	margin: 0;
+}
+
+.wrf-telemetry-modal-close {
+	font-size: 1.6em;
+	line-height: 1;
+	color: #646970;
+	text-decoration: none;
+	cursor: pointer;
+}
+
+.wrf-telemetry-modal-close:hover {
+	color: #d63638;
+}
+
+.wrf-telemetry-json {
+	max-height: 26em;
+	margin: 0.5em 0;
+	padding: 1em;
+	overflow: auto;
+	background: #1e1e1e;
+	border-radius: 6px;
+	font-size: 12px;
+	line-height: 1.6;
+}
+
+.wrf-telemetry-json code {
+	color: #d4d4d4;
+	background: none;
+}
+
+.wrf-json-key {
+	color: #9cdcfe;
+}
+
+.wrf-json-string {
+	color: #ce9178;
+}
+
+.wrf-json-number {
+	color: #b5cea8;
+}
+
+.wrf-json-bool,
+.wrf-json-null {
+	color: #569cd6;
+}
+
+.wrf-telemetry-modal-footer {
+	display: flex;
+	justify-content: flex-end;
+}

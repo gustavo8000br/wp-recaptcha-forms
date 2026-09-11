@@ -610,10 +610,109 @@ final class SettingsPage {
 		}
 
 		$envelope = Envelope::build();
+		$json     = (string) wp_json_encode( $envelope, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
 
+		echo '<dialog class="wrf-telemetry-modal" id="wrf-telemetry-modal">';
+		echo '<div class="wrf-telemetry-modal-header">';
 		echo '<h3>' . esc_html__( 'O que seria enviado agora', 'wp-recaptcha-forms' ) . '</h3>';
+		echo '<button type="button" class="button-link wrf-telemetry-modal-close" id="wrf-telemetry-close" aria-label="' . esc_attr__( 'Fechar', 'wp-recaptcha-forms' ) . '">&times;</button>';
+		echo '</div>';
 		echo '<p class="description">' . esc_html__( 'Cada visualização gera um identificador de envio novo, e o número de sequência mostrado é o do próximo envio. O restante é o estado real desta instalação.', 'wp-recaptcha-forms' ) . '</p>';
-		echo '<pre class="wrf-telemetry-preview">' . esc_html( (string) wp_json_encode( $envelope, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) ) . '</pre>';
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- highlight_json() já devolve HTML seguro: escapa `& < >` antes de tokenizar, nunca depois.
+		echo '<pre class="wrf-telemetry-json"><code id="wrf-telemetry-json-code">' . self::highlight_json( $json ) . '</code></pre>';
+		echo '<div class="wrf-telemetry-modal-footer">';
+		echo '<button type="button" class="button" id="wrf-telemetry-copy" data-label-copy="' . esc_attr__( 'Copiar JSON', 'wp-recaptcha-forms' ) . '" data-label-copied="' . esc_attr__( 'Copiado!', 'wp-recaptcha-forms' ) . '">' . esc_html__( 'Copiar JSON', 'wp-recaptcha-forms' ) . '</button>';
+		echo '</div>';
+		echo '</dialog>';
+
+		/*
+		 * `<dialog>` sem `showModal()` só renderia como um bloco comum na página — o
+		 * backdrop, a centralização e o fechamento com Esc vêm do modo modal nativo, daí o
+		 * script. Fecha também com clique fora do painel (checagem de coordenada, truque
+		 * clássico do `<dialog>`: o próprio elemento ocupa a viewport inteira quando aberto
+		 * com `showModal()`, então um clique no elemento mas fora do retângulo do conteúdo é
+		 * clique no "fundo").
+		 */
+		?>
+		<script>
+		( function () {
+			var dialog = document.getElementById( 'wrf-telemetry-modal' );
+
+			if ( ! dialog || 'function' !== typeof dialog.showModal ) {
+				return;
+			}
+
+			dialog.showModal();
+
+			dialog.addEventListener( 'click', function ( event ) {
+				var rect = dialog.getBoundingClientRect();
+				var dentro = event.clientX >= rect.left && event.clientX <= rect.right && event.clientY >= rect.top && event.clientY <= rect.bottom;
+
+				if ( ! dentro ) {
+					dialog.close();
+				}
+			} );
+
+			var closeBtn = document.getElementById( 'wrf-telemetry-close' );
+
+			if ( closeBtn ) {
+				closeBtn.addEventListener( 'click', function () {
+					dialog.close();
+				} );
+			}
+
+			var copyBtn = document.getElementById( 'wrf-telemetry-copy' );
+			var codeEl  = document.getElementById( 'wrf-telemetry-json-code' );
+
+			if ( copyBtn && codeEl && navigator.clipboard ) {
+				copyBtn.addEventListener( 'click', function () {
+					navigator.clipboard.writeText( codeEl.textContent ).then( function () {
+						copyBtn.textContent = copyBtn.getAttribute( 'data-label-copied' );
+						setTimeout( function () {
+							copyBtn.textContent = copyBtn.getAttribute( 'data-label-copy' );
+						}, 1500 );
+					} );
+				} );
+			}
+		} )();
+		</script>
+		<?php
+	}
+
+	/**
+	 * Realce de sintaxe do JSON, sem biblioteca externa.
+	 *
+	 * Escapa `& < >` ANTES de tokenizar (aspas ficam intactas de propósito: são sintaxe
+	 * do JSON dentro de um `<code>`, não valor de atributo) e só então envolve cada token
+	 * num `<span>` — a saída já é HTML seguro, nunca reescapar depois de chamar isto.
+	 *
+	 * @param string $json JSON já serializado (de `wp_json_encode()`).
+	 * @return string HTML.
+	 */
+	private static function highlight_json( string $json ): string {
+		$escaped = htmlspecialchars( $json, ENT_NOQUOTES, 'UTF-8' );
+
+		$pattern = '/("(?:\\\\u[a-fA-F0-9]{4}|\\\\[^u]|[^\\\\"])*"(\s*:)?|\b(?:true|false|null)\b|-?\d+(?:\.\d+)?(?:[eE][+\-]?\d+)?)/';
+
+		return (string) preg_replace_callback(
+			$pattern,
+			static function ( array $matches ): string {
+				$token = $matches[0];
+
+				if ( '"' === $token[0] ) {
+					$class = ! empty( $matches[2] ) ? 'wrf-json-key' : 'wrf-json-string';
+				} elseif ( 'true' === $token || 'false' === $token ) {
+					$class = 'wrf-json-bool';
+				} elseif ( 'null' === $token ) {
+					$class = 'wrf-json-null';
+				} else {
+					$class = 'wrf-json-number';
+				}
+
+				return '<span class="' . $class . '">' . $token . '</span>';
+			},
+			$escaped
+		);
 	}
 
 	/**

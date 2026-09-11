@@ -22,12 +22,49 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class Sanitizer {
 
 	/**
+	 * Guarda de reentrância (bug real de produção, memory limit estourado em `Options.php`).
+	 *
+	 * `register_setting()` liga este método ao filtro `sanitize_option_{OPTION}`, e o
+	 * WordPress dispara esse filtro em TODO `update_option()` daquela opção — não só no
+	 * POST da tela. `apply_telemetry_consent()` grava a option de novo (via
+	 * `Consent::grant()/revoke()` → `Options::update()`) enquanto ainda está DENTRO desta
+	 * própria chamada, o que reaciona o `sanitize_callback` e recursaria infinitamente sem
+	 * este guard.
+	 *
+	 * @var bool
+	 */
+	private static bool $sanitizing = false;
+
+	/**
 	 * Sanitiza o array inteiro.
 	 *
 	 * @param mixed $input Entrada crua da Settings API.
 	 * @return array
 	 */
 	public static function sanitize( $input ): array {
+		if ( self::$sanitizing ) {
+			// Chamada reentrante: `$input` já é o array que `Options::update()` acabou de
+			// montar (já sanitizado), então devolvê-lo intacto é o comportamento correto do
+			// filtro — e é isso que quebra o ciclo.
+			return is_array( $input ) ? $input : Options::all();
+		}
+
+		self::$sanitizing = true;
+
+		try {
+			return self::do_sanitize( $input );
+		} finally {
+			self::$sanitizing = false;
+		}
+	}
+
+	/**
+	 * Lógica real de sanitização, isolada do guard de reentrância.
+	 *
+	 * @param mixed $input Entrada crua da Settings API.
+	 * @return array
+	 */
+	private static function do_sanitize( $input ): array {
 		$current = Options::all();
 		$input   = is_array( $input ) ? $input : array();
 		$clean   = Options::defaults();

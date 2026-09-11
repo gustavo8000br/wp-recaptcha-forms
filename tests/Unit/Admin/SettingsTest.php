@@ -147,6 +147,59 @@ final class SettingsTest extends TestCase {
 	}
 
 	/**
+	 * Bug real de produção (memory limit estourado, referer sem `wrf_preview`, fatal
+	 * dentro de `Options.php`): `register_setting()` liga `Sanitizer::sanitize()` ao
+	 * filtro `sanitize_option_{OPTION}`, e o WordPress dispara esse filtro em TODO
+	 * `update_option()` daquela opção — não só no POST da tela. Ligar telemetria chama
+	 * `Consent::grant()` → `Options::update()` → `update_option()` de DENTRO do próprio
+	 * `sanitize()`, reacionando o callback. Sem o guard de reentrância isto é recursão
+	 * infinita real.
+	 *
+	 * @return void
+	 */
+	public function test_sanitize_does_not_recurse_when_turning_on_telemetry(): void {
+		register_setting(
+			'wp_recaptcha_forms_group',
+			Options::OPTION,
+			array( 'sanitize_callback' => array( Sanitizer::class, 'sanitize' ) )
+		);
+
+		$clean = Sanitizer::sanitize( array( 'telemetry' => array( 'enabled' => '1' ) ) );
+
+		$this->assertTrue( $clean['telemetry']['enabled'] );
+		$this->assertMatchesRegularExpression( '/^[0-9a-f]{32}$/', $clean['telemetry']['instance_id'] );
+		$this->assertTrue( Options::telemetry_enabled() );
+	}
+
+	/**
+	 * `highlight_json()` escapa `& < >` ANTES de tokenizar — se escapasse depois, um
+	 * valor de string contendo `<script>` viraria HTML cru dentro do popup.
+	 *
+	 * @return void
+	 */
+	public function test_json_highlight_escapes_before_tokenizing(): void {
+		$method = new \ReflectionMethod( \WpRecaptchaForms\Admin\SettingsPage::class, 'highlight_json' );
+		$method->setAccessible( true );
+
+		$json = wp_json_encode(
+			array(
+				'evil' => '<script>alert(1)</script>',
+				'n'    => 3,
+				'ok'   => true,
+				'nil'  => null,
+			)
+		);
+		$html = $method->invoke( null, $json );
+
+		$this->assertStringNotContainsString( '<script>alert', $html );
+		$this->assertStringContainsString( '&lt;script&gt;', $html );
+		$this->assertStringContainsString( '<span class="wrf-json-key">"evil"', $html );
+		$this->assertStringContainsString( '<span class="wrf-json-number">3</span>', $html );
+		$this->assertStringContainsString( '<span class="wrf-json-bool">true</span>', $html );
+		$this->assertStringContainsString( '<span class="wrf-json-null">null</span>', $html );
+	}
+
+	/**
 	 * A sonda distingue secret recusada, provedor inalcançável e secret boa.
 	 *
 	 * @return void
