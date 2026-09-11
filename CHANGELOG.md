@@ -16,6 +16,19 @@ Regra de bump (resumida — a íntegra está na Story 1.18):
 
 ## [Unreleased]
 
+## [1.3.0-beta] - 2026-09-11
+
+### Adicionado
+
+- **Primeiro envio de telemetria acontece imediatamente ao ligar o toggle**, em vez de
+  esperar até 7 dias pela janela semanal com jitter. Continua sendo disparado por
+  WP-Cron (nunca síncrono no request do save): `Consent::grant()` agenda um evento
+  único (`wp_schedule_single_event`) para "agora", além do evento semanal recorrente de
+  sempre — o pseudo-cron do WordPress dispara no próximo acesso ao site. Só na
+  transição real de opt-in, nunca na cura de agendamento perdido do `Transport::boot()`
+  (que roda em toda request com telemetria ligada e reagendaria um envio "imediato" a
+  cada request se disparasse isto também).
+
 ## [1.2.1-beta] - 2026-09-11
 
 ### Corrigido
